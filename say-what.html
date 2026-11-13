@@ -1,0 +1,779 @@
+<title>Why We Say “What?”</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one left-aligned reading column; two wide "instrument" panels (a stopwatch and a
+   multitrack tape of three seconds) break out of it. The word itself is the hero. */
+:root {
+  --bg: #F2F3F8;
+  --panel: #FFFFFF;
+  --ink: #15172B;
+  --muted: #595D7A;
+  --rule: #D6D9E6;
+  --voice: #2947D6;   /* the other person's sound */
+  --mind: #0B8474;    /* your understanding */
+  --what: #D92B62;    /* your mouth */
+  --on-what: #FFFFFF;
+  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E0F1F; --panel: #171931; --ink: #ECEDF8; --muted: #A2A6C6; --rule: #2D3055;
+    --voice: #8DA2FF; --mind: #4FD6C1; --what: #FF6F97; --on-what: #1D0610;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E0F1F; --panel: #171931; --ink: #ECEDF8; --muted: #A2A6C6; --rule: #2D3055;
+  --voice: #8DA2FF; --mind: #4FD6C1; --what: #FF6F97; --on-what: #1D0610;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 17px; line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 980px; margin-inline: auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+  padding-block: clamp(36px, 7vw, 80px) 88px;
+  display: flex; flex-direction: column; gap: clamp(64px, 9vw, 104px);
+}
+.block { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.prose { max-width: 62ch; display: flex; flex-direction: column; gap: 14px; }
+.prose p, .block p { margin: 0; }
+h1, h2, h3 { margin: 0; font-weight: 400; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-size: clamp(2rem, 4.4vw, 2.9rem); line-height: 1.08; max-width: 20ch; }
+.kicker {
+  font-family: var(--font-data); font-size: 0.72rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+}
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 0.92em; white-space: nowrap; }
+em.said { font-family: var(--font-display); font-style: italic; font-size: 1.14em; line-height: 1; }
+a { color: inherit; text-decoration-color: var(--muted); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--voice); outline-offset: 3px; border-radius: 4px; }
+
+/* ---------- hero ---------- */
+.hero { gap: 30px; }
+.q { font-family: var(--font-display); display: flex; flex-direction: column; }
+.q-line { font-size: clamp(1.8rem, 4.8vw, 3.3rem); line-height: 1.1; }
+.q-what {
+  font-style: italic; color: var(--what);
+  font-size: clamp(6.2rem, 27vw, 17rem); line-height: 0.92; letter-spacing: -0.02em;
+  margin-block: 0.02em 0.06em; margin-left: -0.04em;
+  text-shadow:
+    0.17em 0 0 color-mix(in srgb, var(--what) 34%, transparent),
+    0.34em 0 0 color-mix(in srgb, var(--what) 21%, transparent),
+    0.51em 0 0 color-mix(in srgb, var(--what) 12%, transparent),
+    0.68em 0 0 color-mix(in srgb, var(--what) 7%, transparent),
+    0.85em 0 0 color-mix(in srgb, var(--what) 3%, transparent);
+  animation: ring 1.5s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes ring {
+  from { text-shadow:
+    0 0 0 color-mix(in srgb, var(--what) 34%, transparent),
+    0 0 0 color-mix(in srgb, var(--what) 21%, transparent),
+    0 0 0 color-mix(in srgb, var(--what) 12%, transparent),
+    0 0 0 color-mix(in srgb, var(--what) 7%, transparent),
+    0 0 0 color-mix(in srgb, var(--what) 3%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .q-what { animation: none; } }
+.lede { font-size: clamp(1.12rem, 2vw, 1.3rem); line-height: 1.5; max-width: 34em; }
+.lede strong { font-weight: 600; }
+
+/* ---------- instrument panels ---------- */
+.panel {
+  background: var(--panel); border: 1px solid var(--rule); border-radius: 14px;
+  padding: clamp(16px, 3vw, 28px); display: flex; flex-direction: column; gap: 22px; min-width: 0;
+}
+.btn {
+  font: 500 0.92rem/1 var(--font-body); color: var(--ink);
+  background: transparent; border: 1px solid var(--ink); border-radius: 999px;
+  padding: 11px 18px; cursor: pointer;
+}
+.btn:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+/* reaction test */
+.pad {
+  appearance: none; width: 100%; min-height: 168px; border-radius: 10px; cursor: pointer;
+  border: 1px dashed var(--muted); background: color-mix(in srgb, var(--ink) 4%, transparent);
+  color: var(--ink); font-family: var(--font-body);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  padding: 20px; text-align: center; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+}
+.pad-main { font-family: var(--font-display); font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1.1; }
+.pad-sub { font-size: 0.9rem; color: var(--muted); }
+.pad[data-state="waiting"] { border-style: solid; border-color: var(--rule); }
+.pad[data-state="go"] { background: var(--what); border: 1px solid var(--what); color: var(--on-what); }
+.pad[data-state="go"] .pad-sub { color: var(--on-what); }
+
+.bars { display: flex; flex-direction: column; gap: 16px; }
+.bar-row { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.bar-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 0.95rem; }
+.bar-head .num { font-size: 0.9rem; }
+.bar-track { height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 6%, transparent); position: relative; }
+.bar-fill { position: absolute; inset: 0 auto 0 0; border-radius: 3px; transition: width .5s cubic-bezier(.2,.7,.2,1); }
+.bar-fill.is-voice { background: var(--voice); }
+.bar-fill.is-what { background: var(--what); }
+.bar-fill.is-mind { background: var(--mind); }
+.bar-fill.is-typical { background: repeating-linear-gradient(135deg, var(--what) 0 4px, transparent 4px 8px); }
+.bar-axis { position: relative; height: 18px; font-family: var(--font-data); font-size: 0.7rem; color: var(--muted); }
+.bar-axis span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.bar-axis span:first-child { transform: none; }
+.verdict { font-size: 1.02rem; max-width: 60ch; }
+.verdict strong { font-weight: 600; }
+
+/* timeline */
+.readout { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.cap { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); align-items: baseline; gap: 8px; margin: 0; }
+.cap .who { font-family: var(--font-data); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.cap .words { font-family: var(--font-display); font-style: italic; font-size: clamp(1.45rem, 3.4vw, 2rem); line-height: 1.2; min-height: 1.2em; }
+.cap .words span { transition: opacity .12s linear; }
+.cap .words span.off { opacity: 0.18; }
+.cap.them .words { color: var(--voice); }
+.cap.you .words { color: var(--what); }
+.cap .words .aside { font-family: var(--font-body); font-style: normal; font-size: 0.9rem; color: var(--muted); }
+.narr { margin: 6px 0 0; padding-top: 12px; border-top: 1px solid var(--rule); min-height: 4.6em; font-size: 0.98rem; }
+.narr .num { color: var(--muted); margin-right: 8px; }
+
+.scope { display: flex; flex-direction: column; gap: 10px; --t: 100%; min-width: 0; }
+.lane { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.lane-label { font-family: var(--font-data); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.lane-body {
+  position: relative; height: 46px; border-radius: 6px; overflow: hidden;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+.lane-body::after { /* the part of time that hasn't happened yet */
+  content: ""; position: absolute; inset: 0 0 0 var(--t); z-index: 3;
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  border-left: 2px solid var(--ink);
+}
+.stopline { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dashed var(--muted); opacity: .7; }
+.wbar { position: absolute; top: 50%; transform: translateY(-50%); background: var(--voice); border-radius: 1px; }
+.tag { position: absolute; font-size: 0.74rem; line-height: 1; white-space: nowrap; color: var(--ink); z-index: 2; }
+.tag.dim { color: var(--muted); }
+.echo-band {
+  position: absolute; inset: 11px 0 11px 0; border-radius: 3px 0 0 3px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--voice) 50%, transparent) 0%,
+    color-mix(in srgb, var(--voice) 50%, transparent) 36%,
+    color-mix(in srgb, var(--voice) 5%, transparent) 100%);
+}
+.mind-bar { position: absolute; top: 11px; bottom: 11px; border-radius: 3px; background: color-mix(in srgb, var(--mind) 34%, transparent); }
+.mind-bar.lost { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--mind) 34%, transparent) 0 5px, transparent 5px 10px); }
+.mind-dot { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--mind); z-index: 2; box-shadow: 0 0 0 3px var(--panel); }
+.say { position: absolute; bottom: 7px; height: 12px; border-radius: 3px; background: var(--what); }
+.say.ghost { background: transparent; border: 1px dashed var(--muted); }
+.say-tag { bottom: 24px; font-family: var(--font-display); font-style: italic; font-size: 0.94rem; color: var(--ink); }
+.axis { position: relative; height: 18px; font-family: var(--font-data); font-size: 0.7rem; color: var(--muted); }
+.axis span { position: absolute; top: 0; padding-left: 5px; border-left: 1px solid var(--muted); line-height: 14px; white-space: nowrap; }
+.axis span.minor { height: 6px; padding: 0; }
+.legend { font-size: 0.82rem; color: var(--muted); margin: 0; }
+
+.transport { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.transport input[type="range"] { flex: 1 1 200px; min-width: 0; }
+.transport .num { min-width: 5.2em; text-align: right; color: var(--muted); }
+input[type="range"] { accent-color: var(--what); width: 100%; margin: 0; height: 24px; }
+
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px 28px; }
+.ctl { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ctl-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 0.93rem; }
+.ctl-head output { font-family: var(--font-data); font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.presets .kicker { margin-right: 4px; }
+.outcome { border-top: 1px solid var(--rule); padding-top: 18px; display: flex; flex-direction: column; gap: 6px; }
+.outcome-head { font-family: var(--font-display); font-size: clamp(1.4rem, 3vw, 1.8rem); line-height: 1.15; }
+.outcome p { max-width: 62ch; font-size: 0.98rem; }
+
+/* three whats */
+.tones { display: flex; flex-wrap: wrap; gap: 10px; }
+.tone {
+  appearance: none; cursor: pointer; text-align: left; color: var(--ink);
+  background: transparent; border: 1px solid var(--rule); border-radius: 10px; padding: 12px 18px 12px 16px;
+  display: flex; flex-direction: column; gap: 2px; font-family: var(--font-body);
+}
+.tone b { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 2rem; line-height: 1.05; }
+.tone small { font-size: 0.82rem; color: var(--muted); }
+.tone:hover { border-color: var(--muted); }
+.tone[aria-pressed="true"] { border-color: var(--what); background: color-mix(in srgb, var(--what) 9%, transparent); }
+.tone[aria-pressed="true"] b { color: var(--what); }
+.tone-body { max-width: 62ch; min-height: 7.2em; }
+
+/* huh */
+.chorus { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 0; border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
+.huh {
+  appearance: none; cursor: pointer; background: transparent; color: var(--ink); text-align: left;
+  border: 0; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 2px; font-family: var(--font-body); min-width: 0;
+}
+.huh b { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 2.1rem; line-height: 1; }
+.huh small { font-size: 0.8rem; color: var(--muted); }
+.huh:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.huh[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.huh[aria-pressed="true"] small { color: var(--bg); opacity: .75; }
+.huh:focus-visible { outline-offset: -3px; }
+.huh-detail { font-size: 0.98rem; max-width: 62ch; min-height: 3.3em; }
+
+.ticker { font-family: var(--font-display); font-size: clamp(1.5rem, 3.4vw, 2.1rem); line-height: 1.25; max-width: 26em; }
+.ticker .num { font-size: 0.8em; color: var(--what); }
+.close { font-family: var(--font-display); font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.18; max-width: 24em; text-wrap: balance; }
+.close em { color: var(--what); }
+
+.sources { border-top: 1px solid var(--rule); padding-top: 22px; font-size: 0.86rem; color: var(--muted); gap: 12px; }
+.sources ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; max-width: 78ch; }
+</style>
+
+<div class="wrap">
+
+  <header class="block hero">
+    <p class="kicker">A small word, slowed down</p>
+    <h1 class="q">
+      <span class="q-line">Why do we say</span>
+      <span class="q-what">What?</span>
+      <span class="q-line">when we already heard it?</span>
+    </h1>
+    <p class="lede">
+      <strong>Because your mouth has a deadline and your understanding doesn’t.</strong>
+      In conversation you get about a fifth of a second to respond. When the meaning hasn’t arrived by then,
+      your brain sends out the one word that needs no planning, just to hold your place. The sentence is still
+      ringing in a short-lived memory of sound, and you finish decoding it a moment after
+      <em class="said">what?</em> has already left.
+    </p>
+    <p class="prose">You can check each part of that on this page, starting with your own reflexes.</p>
+  </header>
+
+  <section class="block" aria-labelledby="h-react">
+    <p class="kicker">First, measure yourself</p>
+    <h2 id="h-react">You answer faster than you can react</h2>
+    <div class="prose">
+      <p>Tap the panel, wait, and tap again the instant it changes colour. This is the simplest thing a nervous
+      system can do on cue: see a change, move a finger.</p>
+    </div>
+
+    <div class="panel">
+      <button type="button" class="pad" id="pad" data-state="idle" aria-describedby="padHelp">
+        <span class="pad-main" id="padMain">Tap to start</span>
+        <span class="pad-sub" id="padSub">Then tap again the moment this panel changes colour</span>
+      </button>
+      <span id="padHelp" hidden>Reaction timer. Press once to arm, then press again when the panel changes colour.</span>
+
+      <div class="bars" id="bars">
+        <div class="bar-row">
+          <div class="bar-head"><span>The gap between two people’s turns in conversation</span><span class="num">≈ 200 ms</span></div>
+          <div class="bar-track"><div class="bar-fill is-voice" id="barGap"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-head"><span id="rtLabel">A typical reaction to a colour change</span><span class="num" id="rtNum">≈ 250 ms</span></div>
+          <div class="bar-track"><div class="bar-fill is-typical" id="barRt"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-head"><span>Getting a single word ready to say</span><span class="num">≈ 600 ms</span></div>
+          <div class="bar-track"><div class="bar-fill is-mind" id="barWord"></div></div>
+        </div>
+        <div class="bar-axis" id="barAxis" aria-hidden="true"></div>
+      </div>
+
+      <p class="verdict" id="rtVerdict">
+        Across languages, the most common pause between one speaker stopping and the next starting is around
+        200 milliseconds. That is about as fast as a person can react to anything, and replying takes far more
+        work than tapping.
+      </p>
+    </div>
+
+    <div class="prose">
+      <p>The sums don’t work unless you start early. Planning even one word takes about 600 ms, so to speak
+      200 ms after someone stops, you must begin building your reply while they are still talking. You are
+      guessing how their sentence ends and what it will mean, and getting your answer ready on that guess.</p>
+      <p>You do this dozens of times a minute without noticing. <em class="said">What?</em> is what it sounds
+      like when the guess comes due and there is nothing behind it yet.</p>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="h-scope">
+    <p class="kicker">The moment itself</p>
+    <h2 id="h-scope">Three seconds at a dinner table</h2>
+    <div class="prose">
+      <p>Someone asks for the salt while you’re reading your phone. Play it back slowly, or drag through it
+      by hand, and watch three things that normally feel like one: the sound, your grasp of it, and your mouth.</p>
+    </div>
+
+    <div class="panel">
+      <div class="readout">
+        <p class="cap them"><span class="who">Them</span><span class="words" id="capThem"></span></p>
+        <p class="cap you"><span class="who">You</span><span class="words" id="capYou"></span></p>
+        <p class="narr" id="narr" aria-live="polite"></p>
+      </div>
+
+      <div class="scope" id="scope">
+        <div class="lane"><span class="lane-label">Their voice</span><div class="lane-body" id="laneVoice"></div></div>
+        <div class="lane"><span class="lane-label">The echo in your head</span><div class="lane-body" id="laneEcho"></div></div>
+        <div class="lane"><span class="lane-label">Your understanding</span><div class="lane-body" id="laneMind"></div></div>
+        <div class="lane"><span class="lane-label">Your mouth</span><div class="lane-body" id="laneMouth"></div></div>
+        <div class="axis" id="axis" aria-hidden="true"></div>
+      </div>
+      <p class="legend">Dashed line: they stop talking. Dashed box: where a reply would normally begin, about 200 ms later.</p>
+
+      <div class="transport">
+        <button type="button" class="btn" id="playSlow" aria-pressed="false">Play at ¼ speed</button>
+        <button type="button" class="btn" id="playReal" aria-pressed="false">Play at real speed</button>
+        <input type="range" id="scrub" min="0" max="3200" step="10" value="3200" aria-label="Position in time, in milliseconds">
+        <span class="num" id="clock">3,200 ms</span>
+      </div>
+
+      <div class="presets" role="group" aria-label="Situations">
+        <span class="kicker">Try</span>
+        <button type="button" class="btn" data-preset="ears">All ears</button>
+        <button type="button" class="btn" data-preset="scroll">Mid-scroll</button>
+        <button type="button" class="btn" data-preset="odd">Out of nowhere</button>
+        <button type="button" class="btn" data-preset="bar">Loud bar</button>
+      </div>
+
+      <div class="controls">
+        <label class="ctl" for="att">
+          <span class="ctl-head"><span>Where your attention is</span><output id="attOut" for="att"></output></span>
+          <input type="range" id="att" min="0" max="100" value="75">
+        </label>
+        <label class="ctl" for="sur">
+          <span class="ctl-head"><span>How unexpected the sentence is</span><output id="surOut" for="sur"></output></span>
+          <input type="range" id="sur" min="0" max="100" value="40">
+        </label>
+        <label class="ctl" for="noi">
+          <span class="ctl-head"><span>Background noise</span><output id="noiOut" for="noi"></output></span>
+          <input type="range" id="noi" min="0" max="100" value="15">
+        </label>
+      </div>
+
+      <div class="outcome">
+        <span class="kicker">What happens</span>
+        <span class="outcome-head" id="outHead"></span>
+        <p id="outBody"></p>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p>The second track is the part most people have never been told about. Your hearing keeps a raw copy of
+      the last few seconds of sound, called echoic memory, whether or not you were paying attention. It’s why
+      you can “replay” the last thing someone said after they complain you weren’t listening.</p>
+      <p>So the sentence was never lost. It was waiting, undecoded, when your turn arrived. After roughly half
+      a second of silence the pause itself starts to say something, and your brain will not let that happen.
+      It fires the cheapest word it owns. The decoding keeps running on the echo, finishes a few hundred
+      milliseconds later, and you answer a question you just claimed not to have heard.</p>
+      <p>Requests like this do tend to come late. In recorded conversation they most often start about
+      700 ms after the other person stops, three times the usual gap. That extra time is you, trying to work
+      it out alone first.</p>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="h-tones">
+    <p class="kicker">Same word, three jobs</p>
+    <h2 id="h-tones">It was never asking for a thing</h2>
+    <div class="tones" role="group" aria-label="Three ways to say what">
+      <button type="button" class="tone" data-tone="0" aria-pressed="true"><b>What?</b><small>didn’t catch it yet</small></button>
+      <button type="button" class="tone" data-tone="1" aria-pressed="false"><b>What?!</b><small>caught every word</small></button>
+      <button type="button" class="tone" data-tone="2" aria-pressed="false"><b>What.</b><small>go ahead</small></button>
+    </div>
+    <p class="tone-body" id="toneBody"></p>
+    <div class="prose">
+      <p>In none of the three does “what” stand for an object you’re missing. English took its emptiest
+      question word and gave it a job that has little to do with questions: handing the turn back to the
+      other person while you catch up, check, or get ready.</p>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="h-huh">
+    <p class="kicker">It isn’t just English</p>
+    <h2 id="h-huh">Every language tested built the same tool</h2>
+    <div class="prose">
+      <p>English has a second, even smaller version: <em class="said">huh?</em> In 2013 a team of linguists
+      went looking for it elsewhere, in recordings of everyday talk from five continents. Tap one.</p>
+    </div>
+    <div class="chorus" id="chorus" role="group" aria-label="The word for huh in eleven languages"></div>
+    <p class="huh-detail" id="huhDetail" aria-live="polite"></p>
+    <div class="prose">
+      <p>Unrelated languages, with no shared ancestor for the word, arrived at nearly the same sound: one
+      syllable, an open vowel close to where the mouth sits at rest, the pitch of a question. The researchers’
+      explanation is convergent evolution, the way sharks and dolphins ended up the same shape. Every
+      community of speakers faces the same half-second problem, and the fastest possible syllable is the
+      solution each of them found.</p>
+    </div>
+    <p class="ticker" id="ticker"></p>
+  </section>
+
+  <section class="block">
+    <p class="close">
+      So a <em>what?</em> that comes out just before you understand is your brain keeping a promise it made
+      while the other person was still speaking. It buys a third of a second. That is usually enough.
+    </p>
+  </section>
+
+  <footer class="block sources">
+    <span class="kicker">Where the numbers come from</span>
+    <ol>
+      <li>Turn gaps cluster near 200 ms across ten languages: Stivers et al., <a href="https://doi.org/10.1073/pnas.0903616106">“Universals and cultural variation in turn-taking in conversation”</a>, PNAS, 2009.</li>
+      <li>Planning a word takes about 600 ms, so replies must be prepared in overlap: Levinson &amp; Torreira, <a href="https://doi.org/10.3389/fpsyg.2015.00731">“Timing in turn-taking and its implications for processing models of language”</a>, Frontiers in Psychology, 2015.</li>
+      <li>Requests for repetition most often begin after about 700 ms: Kendrick, <a href="https://doi.org/10.3389/fpsyg.2015.00250">“The intersection of turn-taking and repair”</a>, Frontiers in Psychology, 2015.</li>
+      <li>An auditory store lasting a few seconds: Darwin, Turvey &amp; Crowder, <a href="https://doi.org/10.1016/0010-0285(72)90007-2">“An auditory analogue of the Sperling partial report procedure”</a>, Cognitive Psychology, 1972.</li>
+      <li>The same word everywhere: Dingemanse, Torreira &amp; Enfield, <a href="https://doi.org/10.1371/journal.pone.0078273">“Is ‘Huh?’ a universal word?”</a>, PLOS ONE, 2013. Spellings above are approximate.</li>
+      <li>One repair about every 1.4 minutes: Dingemanse et al., <a href="https://doi.org/10.1371/journal.pone.0136100">“Universal principles in the repair of communication problems”</a>, PLOS ONE, 2015.</li>
+    </ol>
+    <p>The timeline is a simplified model. The fixed marks (200 ms, 600 ms, 700 ms, the echo’s few seconds) are measured averages; how the sliders move the moment of understanding is illustrative. Touchscreens and browsers add a few tens of milliseconds to the reaction test.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return Math.round(n).toLocaleString("en-US"); };
+  function el(cls, parent, text) {
+    var d = document.createElement("div");
+    d.className = cls; if (text) d.textContent = text; if (parent) parent.appendChild(d);
+    return d;
+  }
+
+  /* ================= 1. Reaction test ================= */
+  var GAP = 200, WORD = 600, TYPICAL = 250;
+  var pad = $("pad"), padMain = $("padMain"), padSub = $("padSub");
+  var rtState = "idle", rtTimer = null, rtT0 = 0, rtBest = null, rtCount = 0;
+
+  function drawBars() {
+    var rt = rtBest == null ? TYPICAL : rtBest;
+    var max = Math.max(700, Math.ceil((rt + 60) / 100) * 100);
+    $("barGap").style.width = (GAP / max * 100) + "%";
+    $("barWord").style.width = (WORD / max * 100) + "%";
+    $("barRt").style.width = (rt / max * 100) + "%";
+    var axis = $("barAxis"); axis.textContent = "";
+    for (var v = 0; v <= max; v += 200) {
+      if (v / max > 0.93) continue;
+      var s = document.createElement("span");
+      s.style.left = (v / max * 100) + "%"; s.textContent = v === 0 ? "0 ms" : String(v);
+      axis.appendChild(s);
+    }
+  }
+  function setPad(state, main, sub) {
+    rtState = state; pad.dataset.state = state; padMain.textContent = main; padSub.textContent = sub;
+  }
+  function rtPress() {
+    if (rtState === "waiting") {
+      clearTimeout(rtTimer);
+      setPad("early", "Too early", "Tap to try again, and wait for the colour");
+      return;
+    }
+    if (rtState === "go") {
+      var rt = Math.round(performance.now() - rtT0);
+      rtCount += 1;
+      if (rtBest == null || rt < rtBest) rtBest = rt;
+      setPad("result", fmt(rt) + " ms", rtCount > 1 ? "Best so far " + fmt(rtBest) + " ms. Tap to go again" : "Tap to go again");
+      $("rtLabel").textContent = rtCount > 1 ? "Your best reaction of " + rtCount : "Your reaction";
+      $("rtNum").textContent = fmt(rtBest) + " ms";
+      $("barRt").className = "bar-fill is-what";
+      drawBars();
+      var v = $("rtVerdict");
+      if (rtBest >= GAP) {
+        v.innerHTML = "<strong>" + fmt(rtBest) + " ms, just to tap.</strong> People routinely start their reply " +
+          "in less time than that, about 200 ms after the other person stops. A reply needs a thought, words and " +
+          "a breath, and a single word alone takes about 600 ms to prepare. Nobody is that fast. They start early.";
+      } else {
+        v.innerHTML = "<strong>" + fmt(rtBest) + " ms is quick.</strong> It still leaves nowhere near enough time " +
+          "to build a reply after the other person stops. A single word takes about 600 ms to prepare, and the " +
+          "usual gap is 200. Replies get started early.";
+      }
+      return;
+    }
+    setPad("waiting", "Wait for it…", "Tap the moment the colour changes");
+    rtTimer = setTimeout(function () {
+      setPad("go", "Now", "Tap");
+      requestAnimationFrame(function () { rtT0 = performance.now(); });
+      rtT0 = performance.now();
+    }, 1300 + Math.random() * 2200);
+  }
+  pad.addEventListener("pointerdown", function (e) { e.preventDefault(); pad.focus(); rtPress(); });
+  pad.addEventListener("keydown", function (e) {
+    if ((e.key === " " || e.key === "Enter") && !e.repeat) { e.preventDefault(); rtPress(); }
+  });
+  drawBars();
+
+  /* ================= 2. Timeline ================= */
+  var TMAX = 3200, E = 1150;           // axis length; moment they stop talking
+  var COMMIT = E + 500, WHAT = E + 700; // point of no return; "What?" leaves the mouth
+  var WORDS = [["Can", 0, 180], ["you", 180, 330], ["pass", 330, 620], ["the", 620, 740], ["salt?", 740, 1150]];
+  var pct = function (ms) { return (ms / TMAX * 100) + "%"; };
+  var att = $("att"), sur = $("sur"), noi = $("noi"), scrub = $("scrub");
+  var S = null, t = TMAX, playing = 0, lastFrame = 0;
+
+  function compute() {
+    var a = +att.value, s = +sur.value, n = +noi.value;
+    var lost = n > 80;
+    var C = E - 200 + 9 * a + 5 * s + 4 * n;       // when the meaning lands
+    var regime = lost ? "lost" : (C <= COMMIT ? "answer" : "what");
+    var o = { regime: regime, C: C, a: a, s: s, n: n };
+    if (regime === "answer") { o.R = Math.max(E + 200, C + 200); }
+    if (regime === "what") { o.R = Math.max(C + 250, WHAT + 350); }
+    return o;
+  }
+
+  function seeded(seed) {
+    return function () {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var x = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x;
+      return ((x ^ x >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildStatic() {
+    var voice = $("laneVoice"), rnd = seeded(7);
+    for (var m = 8; m < E; m += 21) {
+      var w = WORDS.filter(function (x) { return m >= x[1] && m < x[2]; })[0];
+      var x = (m - w[1]) / (w[2] - w[1]);
+      var h = 0.16 + 0.8 * Math.pow(Math.sin(Math.PI * x), 0.7) * (0.55 + 0.45 * rnd());
+      var b = el("wbar", voice);
+      b.style.left = pct(m); b.style.width = "0.42%"; b.style.height = Math.round(h * 38) + "px";
+    }
+    var tg = el("tag dim", voice, "they stop · 1,150 ms");
+    tg.style.left = "calc(" + pct(E) + " + 8px)"; tg.style.top = "17px";
+
+    var echo = $("laneEcho");
+    el("echo-band", echo);
+    var et = el("tag", echo, "held after the sound is gone");
+    et.style.left = "calc(" + pct(E) + " + 8px)"; et.style.top = "17px";
+
+    ["laneVoice", "laneEcho", "laneMind", "laneMouth"].forEach(function (id) {
+      el("stopline", $(id)).style.left = pct(E);
+    });
+
+    var axis = $("axis");
+    for (var v = 0; v <= 3000; v += 500) {
+      var sp = document.createElement("span");
+      sp.style.left = pct(v);
+      if (v % 1000 === 0) sp.textContent = (v / 1000) + " s"; else sp.className = "minor";
+      axis.appendChild(sp);
+    }
+
+    var cap = $("capThem");
+    WORDS.forEach(function (w, i) {
+      var s = document.createElement("span"); s.textContent = (i ? " " : "“") + w[0] + (i === WORDS.length - 1 ? "”" : "");
+      s.dataset.at = w[1]; cap.appendChild(s);
+    });
+  }
+
+  function clearDyn(lane) {
+    Array.prototype.slice.call(lane.querySelectorAll(".dyn")).forEach(function (n) { n.remove(); });
+  }
+  function placeTag(tag, ms, gapPx) {
+    if (ms / TMAX > 0.42) { tag.style.right = "calc(" + (100 - ms / TMAX * 100) + "% + " + gapPx + "px)"; }
+    else { tag.style.left = "calc(" + pct(ms) + " + " + gapPx + "px)"; }
+  }
+  function sayBlock(lane, a, b, label) {
+    var blk = el("say dyn", lane);
+    blk.style.left = pct(a); blk.style.width = pct(Math.min(b, TMAX) - a);
+    var tg = el("tag say-tag dyn", lane, label);
+    if (a / TMAX > 0.6) tg.style.right = "4px"; else tg.style.left = pct(a);
+  }
+
+  function render() {
+    S = compute();
+    var mind = $("laneMind"), mouth = $("laneMouth"), you = $("capYou");
+    clearDyn(mind); clearDyn(mouth); you.textContent = "";
+
+    var bar = el("mind-bar dyn" + (S.regime === "lost" ? " lost" : ""), mind);
+    bar.style.left = pct(60);
+    if (S.regime === "lost") {
+      bar.style.right = "0";
+      var lt = el("tag dyn", mind, "mostly noise. Nothing to decode"); lt.style.left = "calc(" + pct(E) + " + 8px)"; lt.style.top = "17px";
+    } else {
+      bar.style.width = pct(S.C - 60);
+      el("mind-dot dyn", mind).style.left = pct(S.C);
+      var mt = el("tag dyn", mind, "meaning lands · " + fmt(S.C) + " ms"); mt.style.top = "17px";
+      placeTag(mt, S.C, 14);
+    }
+
+    var ghost = el("say ghost dyn", mouth); ghost.style.left = pct(E + 200); ghost.style.width = pct(260);
+    function word(text, at, cls) {
+      var s = document.createElement("span"); s.textContent = text; s.dataset.at = at; if (cls) s.className = cls;
+      you.appendChild(s);
+    }
+    if (S.regime === "answer") {
+      sayBlock(mouth, S.R, S.R + 620, "Sure. Here.");
+      word("“Sure. Here.”", S.R);
+    } else {
+      sayBlock(mouth, WHAT, WHAT + 300, "What?");
+      word("“What?”", WHAT);
+      if (S.regime === "what") {
+        sayBlock(mouth, S.R, S.R + 700, "Oh. The salt.");
+        word(" “…oh. The salt. Here.”", S.R);
+      } else {
+        word(" they have to say it again", WHAT + 500, "aside");
+      }
+    }
+
+    $("attOut").textContent = S.a < 25 ? "On them" : S.a < 60 ? "Drifting" : "Elsewhere";
+    $("surOut").textContent = S.s < 30 ? "Expected" : S.s < 70 ? "Unusual" : "Out of nowhere";
+    $("noiOut").textContent = S.n < 30 ? "Quiet" : S.n <= 80 ? "Noisy" : "Drowning it out";
+
+    var head = $("outHead"), body = $("outBody"), d = Math.round(S.C - E);
+    if (S.regime === "answer") {
+      head.textContent = "You answer on time.";
+      body.textContent = (d <= 0
+        ? "You had the meaning " + fmt(-d) + " ms before they finished, because you predicted the ending. "
+        : "The meaning landed " + fmt(d) + " ms after they stopped, a little late but before the silence got awkward. ") +
+        "Your reply starts " + fmt(S.R - E) + " ms after their last sound. No “what?” needed.";
+    } else if (S.regime === "what") {
+      head.textContent = "You say “What?” and then answer anyway.";
+      body.textContent = "The meaning landed " + fmt(d) + " ms after they stopped. " +
+        (S.C < WHAT
+          ? "That was " + fmt(WHAT - S.C) + " ms before “What?” came out, but the word was already on its way and couldn’t be called back. "
+          : "By then “What?” had been out for " + fmt(S.C - WHAT) + " ms. ") +
+        "The sound was only " + (S.C / 1000).toFixed(1) + " seconds old, well inside the echo, so you never needed the repeat.";
+    } else {
+      head.textContent = "You say “What?” and mean it.";
+      body.textContent = "The noise damaged the sound before it reached you. The echo keeps a faithful copy, but it is a " +
+        "copy of noise, and no amount of extra time will decode it. This is the “what?” the word was built for.";
+    }
+    setTime(TMAX);
+  }
+
+  function narrate() {
+    var r = S.regime, x;
+    if (t < 60) x = "Their first sound is crossing the table.";
+    else if (t < E) {
+      x = r === "answer"
+        ? (S.C <= E && t >= S.C ? "They’re still talking, and you already know how this sentence ends. Your reply is being built."
+                                 : "They’re talking. You’re decoding each word as it arrives and guessing the rest.")
+        : r === "what" ? "They’re talking. The sound reaches your ears and goes into the echo. Your attention is somewhere else."
+        : "They’re talking, but the noise is burying the words.";
+    } else if (r === "answer") {
+      x = t < S.R ? (S.C <= E ? "They’ve stopped. Your reply was ready before they finished."
+                              : (t < S.C ? "They’ve stopped. You’re a beat behind, still finishing the thought."
+                                         : "Got it, with time to spare before the silence means anything."))
+                  : "You answer " + fmt(S.R - E) + " ms after they stop. Nobody notices a gap.";
+    } else if (t < COMMIT) {
+      x = r === "what" ? "Silence. It’s your turn and you have nothing ready. The sentence sits in the echo, not yet decoded."
+                       : "Silence. It’s your turn. You search the echo and find mostly noise.";
+    } else if (r === "lost") {
+      x = t < WHAT ? "Nothing is coming. Your brain commits to the repair word."
+                   : "A real “What?” The echo is too damaged to read, so they’ll need to say it again.";
+    } else if (t < WHAT) {
+      x = t >= S.C ? "The meaning just landed. Too late: “What?” is already on its way to your mouth and can’t be recalled."
+                   : "The pause has gone on too long. Your brain commits to the one word that needs no planning.";
+    } else if (t < S.C) {
+      x = "“What?” is out. The decoding hasn’t stopped, though. It’s still working through the echo.";
+    } else if (t < S.R) {
+      x = S.C >= WHAT ? "There it is. The meaning lands " + fmt(S.C - WHAT) + " ms after you asked for it."
+                      : "You’ve said “What?” while already knowing the answer. Now your mouth has to catch up.";
+    } else {
+      x = "You answer your own question. They never had to repeat a word.";
+    }
+    $("narr").innerHTML = '<span class="num">' + fmt(t) + " ms</span>";
+    $("narr").appendChild(document.createTextNode(x));
+  }
+
+  function setTime(ms) {
+    t = Math.max(0, Math.min(TMAX, ms));
+    $("scope").style.setProperty("--t", (t / TMAX * 100) + "%");
+    scrub.value = Math.round(t);
+    $("clock").textContent = fmt(t) + " ms";
+    Array.prototype.forEach.call(document.querySelectorAll("#capThem span, #capYou span"), function (s) {
+      s.classList.toggle("off", t < +s.dataset.at);
+    });
+    narrate();
+  }
+
+  function stop() {
+    playing = 0;
+    $("playSlow").setAttribute("aria-pressed", "false"); $("playSlow").textContent = "Play at ¼ speed";
+    $("playReal").setAttribute("aria-pressed", "false"); $("playReal").textContent = "Play at real speed";
+  }
+  function frame(now) {
+    if (!playing) return;
+    var dt = Math.min(now - lastFrame, 64); lastFrame = now;
+    setTime(t + dt * playing);
+    if (t >= TMAX) { stop(); return; }
+    requestAnimationFrame(frame);
+  }
+  function play(rate, btn) {
+    var wasThis = playing === rate;
+    stop();
+    if (wasThis) return;
+    if (t >= TMAX - 5) setTime(0);
+    playing = rate; btn.setAttribute("aria-pressed", "true"); btn.textContent = "Pause";
+    lastFrame = performance.now(); requestAnimationFrame(frame);
+  }
+  $("playSlow").addEventListener("click", function () { play(0.25, this); });
+  $("playReal").addEventListener("click", function () { play(1, this); });
+  scrub.addEventListener("input", function () { stop(); setTime(+scrub.value); });
+  [att, sur, noi].forEach(function (i) { i.addEventListener("input", function () { stop(); render(); }); });
+
+  var PRESETS = { ears: [5, 10, 10], scroll: [75, 40, 15], odd: [30, 95, 10], bar: [20, 30, 92] };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-preset]"), function (b) {
+    b.addEventListener("click", function () {
+      var p = PRESETS[b.dataset.preset];
+      att.value = p[0]; sur.value = p[1]; noi.value = p[2];
+      stop(); render(); setTime(0); play(0.25, $("playSlow"));
+    });
+  });
+
+  buildStatic(); render();
+
+  /* ================= 3. Three whats ================= */
+  var TONES = [
+    "The half-second kind. You’re flagging trouble without saying where it is, because you don’t know yet. " +
+    "Linguists call this an open request: the vaguest repair there is, used when you have nothing more specific " +
+    "to offer. If you had caught most of the sentence, you would have said “pass the what?” instead.",
+    "You heard it perfectly. The sound arrived, the meaning arrived, and the meaning didn’t fit the world you " +
+    "were expecting. This one asks the speaker to say it again so you can check it’s real. It is a request for " +
+    "confirmation wearing the costume of a hearing problem.",
+    "Someone says your name, or “guess what,” and you reply “what” knowing full well that nothing has been said " +
+    "yet. Here the word means the line is open and you’re listening. Linguists call it a go-ahead."
+  ];
+  var toneBtns = document.querySelectorAll(".tone");
+  function setTone(i) {
+    Array.prototype.forEach.call(toneBtns, function (b, k) { b.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+    $("toneBody").textContent = TONES[i];
+  }
+  Array.prototype.forEach.call(toneBtns, function (b) {
+    b.addEventListener("click", function () { setTone(+b.dataset.tone); });
+  });
+  setTone(0);
+
+  /* ================= 4. Huh ================= */
+  var HUH = [
+    ["English", "huh?", "", true], ["Spanish", "¿eh?", "", true], ["Italian", "eh?", "", true],
+    ["Dutch", "hè?", "", true], ["Icelandic", "ha?", "Iceland", false], ["Russian", "а?", "written “a?” in Latin letters", true],
+    ["Mandarin", "á?", "", true], ["Lao", "hãa?", "Laos", true], ["Siwu", "ã?", "eastern Ghana", true],
+    ["Cha’palaa", "aa?", "the rainforest of northern Ecuador", false], ["Murrinh-Patha", "aa?", "Australia’s Northern Territory", true]
+  ];
+  var chorus = $("chorus"), huhBtns = [];
+  function setHuh(i) {
+    huhBtns.forEach(function (b, k) { b.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+    var h = HUH[i];
+    $("huhDetail").textContent = h[0] + (h[2] ? " (" + h[2] + ")" : "") + ": one open syllable, " +
+      (h[3] ? "with the rising pitch of a question." : "with falling pitch, because questions fall in this language. Same tool, tuned to local rules.");
+  }
+  HUH.forEach(function (h, i) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "huh";
+    var f = document.createElement("b"); f.textContent = h[1];
+    var s = document.createElement("small"); s.textContent = h[0];
+    b.appendChild(f); b.appendChild(s); chorus.appendChild(b); huhBtns.push(b);
+    b.addEventListener("click", function () { setHuh(i); });
+  });
+  setHuh(8);
+
+  /* ================= 5. Ticker ================= */
+  var opened = Date.now();
+  function tick() {
+    var sec = Math.floor((Date.now() - opened) / 1000), n = Math.floor(sec / 84);
+    var mm = Math.floor(sec / 60), ss = ("0" + (sec % 60)).slice(-2);
+    $("ticker").innerHTML = "In ordinary conversation, someone stops to ask for a repair like this about once every 84 seconds. " +
+      'You opened this page <span class="num">' + mm + ":" + ss + "</span> ago. Had we been talking, that’s " +
+      '<span class="num">' + n + "</span> " + (n === 1 ? "time" : "times") + " so far.";
+  }
+  tick(); setInterval(tick, 1000);
+})();
+</script>
