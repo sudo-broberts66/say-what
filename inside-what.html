@@ -1,0 +1,1076 @@
+<title>Inside “What?”</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a one-screen stage in the dark, six scenes deep. Sound is drawn as rings on a full-bleed
+   canvas behind everything; type sits on top. One deliberate visual world (night), so single theme. */
+:root {
+  color-scheme: dark;
+  --bg: #0B0C1C;
+  --panel: #15172E;
+  --ink: #ECEDF8;
+  --muted: #A2A6C6;
+  --rule: #2D3055;
+  --voice: #8DA2FF;   /* the other person's sound */
+  --mind: #4FD6C1;    /* your understanding */
+  --what: #FF6F97;    /* your mouth */
+  --on-what: #1D0610;
+  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); overflow: hidden;
+  font-family: var(--font-body); font-size: 17px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+}
+#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.stage { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+.scenes { position: relative; flex: 1; min-height: 0; }
+.scene {
+  position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+  padding-left: max(20px, env(safe-area-inset-left, 0px), calc((100% - 860px) / 2));
+  padding-right: max(20px, env(safe-area-inset-right, 0px), calc((100% - 860px) / 2));
+  padding-block: clamp(18px, 4vh, 44px) 16px;
+  display: flex; flex-direction: column; gap: 16px;
+  animation: enter .7s cubic-bezier(.2,.7,.2,1) both;
+}
+.scene > * { width: 100%; flex: none; }
+@keyframes enter { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .scene { animation: none; } }
+
+h1, h2, p { margin: 0; }
+h1, h2 { font-weight: 400; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-size: clamp(1.8rem, 4.6vw, 2.9rem); line-height: 1.06; }
+.kicker { font-family: var(--font-data); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 0.9em; white-space: nowrap; }
+.copy { max-width: 60ch; }
+.copy-in { max-width: 60ch; }
+.fine { font-size: 0.86rem; color: var(--muted); }
+em.said { font-family: var(--font-display); font-style: italic; font-size: 1.14em; line-height: 1; }
+a { color: inherit; text-decoration-color: var(--muted); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--voice); outline-offset: 3px; border-radius: 4px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn {
+  font: 500 0.92rem/1 var(--font-body); color: var(--ink); background: transparent;
+  border: 1px solid var(--muted); border-radius: 999px; padding: 12px 18px; cursor: pointer; touch-action: manipulation;
+}
+.btn:hover { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.btn.primary { background: var(--what); border-color: var(--what); color: var(--on-what); font-weight: 600; }
+.btn.primary:hover { background: color-mix(in srgb, var(--what) 86%, var(--ink)); }
+.btn[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.btn:disabled { opacity: .35; cursor: default; }
+input[type="range"] { accent-color: var(--what); width: 100%; margin: 0; height: 24px; }
+
+/* ---------- chrome ---------- */
+.chrome {
+  flex: none; display: flex; align-items: center; gap: 10px;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px));
+  border-top: 1px solid var(--rule); background: color-mix(in srgb, var(--bg) 86%, transparent);
+}
+.chrome .btn { padding: 10px 14px; font-size: 0.86rem; }
+.dots { flex: 1; display: flex; justify-content: center; gap: 4px; min-width: 0; }
+.dots button { appearance: none; border: 0; background: transparent; padding: 8px 4px; cursor: pointer; }
+.dots button::before { content: ""; display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--rule); }
+.dots button[aria-current="true"]::before { background: var(--what); }
+.dots button.seen::before { background: var(--muted); }
+.dots button[aria-current="true"].seen::before { background: var(--what); }
+@media (max-width: 480px) {
+  .chrome { gap: 6px; }
+  .chrome .btn { padding: 9px 11px; font-size: 0.8rem; }
+  .dots { gap: 0; }
+  .dots button { padding: 8px 3px; }
+}
+
+/* ---------- scene 0: title ---------- */
+.s-title { justify-content: center; gap: 22px; }
+.q { font-family: var(--font-display); display: flex; flex-direction: column; }
+.q-line { font-size: clamp(1.6rem, 4.4vw, 3rem); line-height: 1.1; }
+.q-what {
+  font-style: italic; color: var(--what);
+  font-size: clamp(5.6rem, min(26vw, 30vh), 16rem); line-height: 0.92; letter-spacing: -0.02em;
+  margin-block: 0.02em 0.06em; margin-left: -0.04em;
+  text-shadow:
+    0.17em 0 0 color-mix(in srgb, var(--what) 34%, transparent),
+    0.34em 0 0 color-mix(in srgb, var(--what) 21%, transparent),
+    0.51em 0 0 color-mix(in srgb, var(--what) 12%, transparent),
+    0.68em 0 0 color-mix(in srgb, var(--what) 7%, transparent),
+    0.85em 0 0 color-mix(in srgb, var(--what) 3%, transparent);
+}
+.lede { font-size: clamp(1.08rem, 2vw, 1.28rem); line-height: 1.45; }
+.lede strong { font-weight: 600; }
+
+/* ---------- scene 1: the table ---------- */
+.table { display: flex; flex-direction: column; align-items: center; gap: 12px; flex: 1 0 auto; min-height: 0; }
+.heard { font-family: var(--font-display); font-style: italic; font-size: clamp(1.5rem, 4vw, 2.2rem); line-height: 1.2; color: var(--voice); min-height: 1.2em; text-align: center; }
+.heard span { filter: blur(7px); opacity: .8; transition: filter .22s linear, opacity .22s linear; }
+.heard.clear span { filter: none; opacity: 1; }
+.phone {
+  position: relative; width: min(100%, 300px); height: clamp(180px, 34vh, 300px); flex: none;
+  border: 1px solid var(--rule); border-radius: 26px; background: var(--panel); overflow: hidden;
+  transition: opacity .3s linear; touch-action: manipulation;
+}
+.phone.frozen { opacity: .35; }
+.phone-count { position: absolute; left: 14px; top: 10px; font-family: var(--font-data); font-size: 0.72rem; color: var(--muted); letter-spacing: .08em; }
+.dot {
+  appearance: none; position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 0; padding: 0;
+  background: var(--ink); cursor: pointer; touch-action: manipulation;
+}
+.spoke { font-family: var(--font-display); font-style: italic; color: var(--what); text-align: center; min-height: 1.1em; line-height: 1.05; font-size: clamp(1.4rem, 3.6vw, 2rem); }
+.spoke b { font-weight: 400; font-size: 2.6em; display: inline-block; animation: pop .22s cubic-bezier(.2,1.6,.4,1) both; margin-right: .12em; }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } }
+.silence { color: var(--muted); min-height: 1.4em; text-align: center; }
+.after { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--rule); padding-top: 16px; }
+
+/* ---------- scene 2: inside the moment ---------- */
+.narr { min-height: 3.1em; font-size: 1rem; max-width: 62ch; }
+.narr .num { color: var(--muted); margin-right: 8px; }
+.ring-slot { flex: 1 1 auto !important; min-height: 230px; }
+.ruler { position: relative; padding-top: 12px; }
+.ruler-track { position: absolute; left: 8px; right: 8px; top: 0; height: 10px; }
+.ruler-track i { position: absolute; top: 0; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.78rem; color: var(--muted); }
+.legend i, .ruler-track i { display: inline-block; }
+.legend i { width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.k-voice { background: var(--voice); } .k-what { background: var(--what); } .k-mind { background: var(--mind); }
+.k-slot { border: 1px solid var(--muted); }
+.transport { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.transport .num { color: var(--muted); margin-left: auto; }
+.sheet {
+  position: absolute; z-index: 5; bottom: 10px; max-height: 70%; overflow-y: auto;
+  left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
+  width: auto !important; max-width: 720px !important;
+  background: var(--panel); border: 1px solid var(--rule); border-radius: 16px; padding: 16px 18px 18px;
+  display: flex; flex-direction: column; gap: 14px; box-shadow: 0 -20px 60px color-mix(in srgb, var(--bg) 70%, transparent);
+}
+.sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px 24px; }
+.ctl { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.ctl-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 0.9rem; }
+.ctl-head output { font-family: var(--font-data); font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.sheet .btn { padding: 9px 13px; font-size: 0.84rem; }
+.outcome-head { font-family: var(--font-display); font-size: 1.45rem; line-height: 1.15; }
+.outcome-body { font-size: 0.92rem; color: var(--muted); }
+
+/* ---------- scene 3: the deadline ---------- */
+.pad {
+  appearance: none; width: 100%; min-height: 150px; flex: 1 1 150px !important; max-height: 300px; border-radius: 16px; cursor: pointer;
+  border: 1px dashed var(--muted); background: color-mix(in srgb, var(--ink) 5%, transparent);
+  color: var(--ink); font-family: var(--font-body);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  padding: 18px; text-align: center; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+}
+.pad-main { font-family: var(--font-display); font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.1; }
+.pad-sub { font-size: 0.9rem; color: var(--muted); }
+.pad[data-state="waiting"], .pad[data-state="rest"] { border-style: solid; border-color: var(--rule); }
+.pad[data-state="go"], .pad[data-state="pulse-what"] { background: var(--what); border: 1px solid var(--what); color: var(--on-what); }
+.pad[data-state="pulse-voice"] { background: var(--voice); border: 1px solid var(--voice); color: var(--bg); }
+.pad[data-state="pulse-mind"] { background: var(--mind); border: 1px solid var(--mind); color: var(--bg); }
+.pad[data-state="go"] .pad-sub, .pad[data-state^="pulse"] .pad-sub { color: inherit; }
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.bar-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 0.9rem; }
+.bar-track { height: 10px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 8%, transparent); position: relative; }
+.bar-fill { position: absolute; inset: 0 auto 0 0; border-radius: 3px; transition: width .5s cubic-bezier(.2,.7,.2,1); }
+.bar-fill.is-voice { background: var(--voice); } .bar-fill.is-what { background: var(--what); } .bar-fill.is-mind { background: var(--mind); }
+.bar-fill.is-typical { background: repeating-linear-gradient(135deg, var(--what) 0 4px, transparent 4px 8px); }
+
+/* ---------- scene 4: the chorus ---------- */
+.chorus { display: flex; flex-wrap: wrap; gap: 6px 10px; }
+.huh {
+  appearance: none; cursor: pointer; background: transparent; color: var(--ink); text-align: left;
+  border: 1px solid transparent; border-radius: 12px; padding: 8px 14px 9px;
+  display: flex; flex-direction: column; gap: 0; font-family: var(--font-body); touch-action: manipulation;
+}
+.huh b { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: clamp(2rem, 6vw, 3.1rem); line-height: 1; transition: color .15s linear; }
+.huh small { font-size: 0.76rem; color: var(--muted); }
+.huh:hover { border-color: var(--rule); }
+.huh[aria-pressed="true"] { border-color: var(--rule); background: var(--panel); }
+.huh.sounding b { color: var(--what); }
+.huh-detail { min-height: 3.2em; max-width: 60ch; }
+
+/* ---------- scene 5: three melodies ---------- */
+.tones { display: flex; flex-wrap: wrap; gap: 10px; }
+.tone {
+  appearance: none; cursor: pointer; text-align: left; color: var(--ink); touch-action: manipulation;
+  background: transparent; border: 1px solid var(--rule); border-radius: 14px; padding: 12px 18px 12px 16px;
+  display: grid; grid-template-columns: auto auto; column-gap: 14px; align-items: center; font-family: var(--font-body);
+}
+.tone b { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: clamp(2rem, 6vw, 2.8rem); line-height: 1.05; }
+.tone small { grid-column: 1 / -1; font-size: 0.8rem; color: var(--muted); }
+.tone svg { width: 46px; height: 30px; color: var(--muted); }
+.tone:hover { border-color: var(--muted); }
+.tone[aria-pressed="true"] { border-color: var(--what); background: color-mix(in srgb, var(--what) 10%, transparent); }
+.tone[aria-pressed="true"] b, .tone[aria-pressed="true"] svg { color: var(--what); }
+.tone-body { max-width: 60ch; min-height: 6.4em; }
+
+/* ---------- scene 6: close ---------- */
+.s-close { justify-content: center; gap: 22px; }
+.close { font-family: var(--font-display); font-size: clamp(1.7rem, 4.4vw, 2.8rem); line-height: 1.16; text-wrap: balance; }
+.close em { color: var(--what); }
+.ticker { max-width: 60ch; color: var(--muted); }
+.ticker .num { color: var(--ink); }
+details.sources { font-size: 0.84rem; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
+details.sources summary { cursor: pointer; font-family: var(--font-data); font-size: 0.7rem; letter-spacing: .12em; text-transform: uppercase; }
+details.sources ol { margin: 12px 0 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; max-width: 76ch; }
+details.sources p { margin-top: 10px; max-width: 76ch; }
+</style>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<div class="stage">
+  <main class="scenes">
+
+    <section class="scene s-title" id="s0" data-name="Title">
+      <p class="kicker">An answer you step inside</p>
+      <h1 class="q">
+        <span class="q-line">Why do we say</span>
+        <span class="q-what" id="titleWhat">What?</span>
+        <span class="q-line">when we already heard it?</span>
+      </h1>
+      <p class="lede copy">
+        <strong>Because your mouth has a deadline and your understanding doesn’t.</strong>
+        The next few minutes put you inside the half-second where one outruns the other.
+      </p>
+      <div class="row">
+        <button type="button" class="btn primary" id="beginSound">Begin with sound</button>
+        <button type="button" class="btn" id="beginQuiet">Begin in silence</button>
+      </div>
+      <p class="fine">Six short scenes. Better with headphones. The voices are synthesized murmurs, not recordings.
+        <a href="https://claude.ai/artifact/KjvZS9prbv5et53TCUQZ39">Read the text version instead</a></p>
+    </section>
+
+    <section class="scene" id="s1" data-name="Dinner" hidden>
+      <p class="kicker">Scene 1 · Dinner</p>
+      <h2>You’re at the table, on your phone</h2>
+      <p class="copy" id="s1Hint">Tap each dot the moment it appears. Keep going, whatever happens.</p>
+      <div class="table">
+        <p class="heard" id="heard" aria-live="polite"></p>
+        <div class="phone" id="phone">
+          <span class="phone-count" id="dotCount">0</span>
+          <button type="button" class="dot" id="dot" aria-label="Dot. Tap it"></button>
+        </div>
+        <p class="spoke" id="spoke" aria-live="polite"></p>
+        <p class="silence num" id="silence"></p>
+      </div>
+      <div class="after" id="s1After" hidden>
+        <p class="copy-in">You didn’t choose that word. Your mouth sent it <span class="num">35 ms</span> before you understood
+          the sentence, and nobody repeated anything. Everything you needed was already in your head.</p>
+        <div class="row">
+          <button type="button" class="btn primary" data-go="2">Step inside the moment</button>
+          <button type="button" class="btn" id="s1Again">Run it again</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene" id="s2" data-name="Inside the moment" hidden>
+      <p class="kicker">Scene 2 · The same moment, slowed</p>
+      <h2>Three seconds, from the inside</h2>
+      <p class="narr" id="narr"></p>
+      <div class="ring-slot" id="ringSlot" role="img" aria-label="A ring that fills with the sound of the sentence and slowly fades, with the words decoding at its centre."></div>
+      <div class="ruler">
+        <div class="ruler-track" id="rulerTrack" aria-hidden="true"></div>
+        <input type="range" id="scrub" min="0" max="3200" step="10" value="3200" aria-label="Position in time, in milliseconds">
+      </div>
+      <p class="legend">
+        <span><i class="k-voice"></i>ring: the sound, held and fading</span>
+        <span><i class="k-mind"></i>inner arc: your understanding</span>
+        <span><i class="k-what"></i>your mouth</span>
+        <span><i class="k-slot"></i>where a reply normally starts</span>
+      </p>
+      <div class="transport">
+        <button type="button" class="btn primary" id="playSlow" aria-pressed="false">Play at ¼ speed</button>
+        <button type="button" class="btn" id="playReal" aria-pressed="false">Real speed</button>
+        <button type="button" class="btn" id="sheetOpen" aria-expanded="false" aria-controls="sheet">Change the moment</button>
+        <span class="num" id="clock">3,200 ms</span>
+      </div>
+      <div class="sheet" id="sheet" hidden>
+        <div class="sheet-head">
+          <span class="kicker">Change the moment</span>
+          <button type="button" class="btn" id="sheetClose">Done</button>
+        </div>
+        <div class="row" role="group" aria-label="Situations">
+          <button type="button" class="btn" data-preset="ears">All ears</button>
+          <button type="button" class="btn" data-preset="scroll">Mid-scroll</button>
+          <button type="button" class="btn" data-preset="odd">Out of nowhere</button>
+          <button type="button" class="btn" data-preset="bar">Loud bar</button>
+        </div>
+        <div class="controls">
+          <label class="ctl" for="att"><span class="ctl-head"><span>Where your attention is</span><output id="attOut" for="att"></output></span>
+            <input type="range" id="att" min="0" max="100" value="75"></label>
+          <label class="ctl" for="sur"><span class="ctl-head"><span>How unexpected the sentence is</span><output id="surOut" for="sur"></output></span>
+            <input type="range" id="sur" min="0" max="100" value="40"></label>
+          <label class="ctl" for="noi"><span class="ctl-head"><span>Background noise</span><output id="noiOut" for="noi"></output></span>
+            <input type="range" id="noi" min="0" max="100" value="15"></label>
+        </div>
+        <div>
+          <p class="outcome-head" id="outHead"></p>
+          <p class="outcome-body" id="outBody"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene" id="s3" data-name="The deadline" hidden>
+      <p class="kicker">Scene 3 · The deadline</p>
+      <h2>You answer faster than you can react</h2>
+      <p class="copy">Why was your mouth in such a hurry? Tap the panel, wait, and tap again the instant it changes colour.</p>
+      <button type="button" class="pad" id="pad" data-state="idle">
+        <span class="pad-main" id="padMain">Tap to start</span>
+        <span class="pad-sub" id="padSub">Then tap again the moment this panel changes colour</span>
+      </button>
+      <div class="bars">
+        <div class="bar-row">
+          <div class="bar-head"><span>The gap between two people’s turns</span><span class="num">≈ 200 ms</span></div>
+          <div class="bar-track"><div class="bar-fill is-voice" id="barGap"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-head"><span id="rtLabel">A typical reaction to a colour change</span><span class="num" id="rtNum">≈ 250 ms</span></div>
+          <div class="bar-track"><div class="bar-fill is-typical" id="barRt"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-head"><span>Getting a single word ready to say</span><span class="num">≈ 600 ms</span></div>
+          <div class="bar-track"><div class="bar-fill is-mind" id="barWord"></div></div>
+        </div>
+      </div>
+      <div class="row"><button type="button" class="btn" id="feel">Feel the three durations</button></div>
+      <p class="copy" id="rtVerdict">People start replying about 200 ms after the other person stops. That is as fast as a
+        human can react to anything, and a single word takes three times longer to prepare. So you begin building your
+        reply while they are still talking, on a guess about how their sentence ends. <em class="said">What?</em> is the
+        sound of that guess coming due with nothing behind it.</p>
+    </section>
+
+    <section class="scene" id="s4" data-name="The chorus" hidden>
+      <p class="kicker">Scene 4 · The chorus</p>
+      <h2>Every language tested built the same tool</h2>
+      <p class="copy">English has a smaller version, <em class="said">huh?</em> In 2013 linguists went looking for it in
+        recordings of everyday talk from five continents. Tap one to hear its shape.</p>
+      <div class="chorus" id="chorus" role="group" aria-label="The word for huh in eleven languages"></div>
+      <div class="row"><button type="button" class="btn primary" id="chorusAll">Play them all</button></div>
+      <p class="huh-detail" id="huhDetail" aria-live="polite"></p>
+      <p class="copy">Unrelated languages arrived at nearly the same sound: one syllable, an open vowel close to where the
+        mouth sits at rest, the pitch of a question. The researchers call it convergent evolution, the way sharks and
+        dolphins ended up the same shape. Every community faces the same half-second problem, and this is the fastest
+        syllable a mouth can make.</p>
+    </section>
+
+    <section class="scene" id="s5" data-name="Three melodies" hidden>
+      <p class="kicker">Scene 5 · One word, three melodies</p>
+      <h2>It was never asking for a thing</h2>
+      <div class="tones" role="group" aria-label="Three ways to say what">
+        <button type="button" class="tone" data-tone="0" aria-pressed="true"><b>What?</b>
+          <svg viewBox="0 0 32 24" aria-hidden="true"><polyline points="2,20 14,17 30,4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <small>didn’t catch it yet</small></button>
+        <button type="button" class="tone" data-tone="1" aria-pressed="false"><b>What?!</b>
+          <svg viewBox="0 0 32 24" aria-hidden="true"><polyline points="2,13 13,3 30,20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <small>caught every word</small></button>
+        <button type="button" class="tone" data-tone="2" aria-pressed="false"><b>What.</b>
+          <svg viewBox="0 0 32 24" aria-hidden="true"><polyline points="2,9 16,12 30,20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <small>go ahead</small></button>
+      </div>
+      <p class="tone-body" id="toneBody"></p>
+      <p class="copy">In none of the three does “what” stand for an object you’re missing. English took its emptiest
+        question word and gave it a different job: handing the turn back while you catch up, check, or get ready.</p>
+    </section>
+
+    <section class="scene s-close" id="s6" data-name="Back at the table" hidden>
+      <p class="kicker">Scene 6 · Back at the table</p>
+      <p class="close">A <em>what?</em> that comes out just before you understand is your brain keeping a promise it made
+        while the other person was still speaking. It buys a third of a second. That is usually enough.</p>
+      <p class="ticker" id="ticker"></p>
+      <div class="row">
+        <button type="button" class="btn primary" data-go="1">Sit down at the table again</button>
+        <a class="btn" href="https://claude.ai/artifact/KjvZS9prbv5et53TCUQZ39">Read the text version</a>
+      </div>
+      <details class="sources">
+        <summary>Where the numbers come from</summary>
+        <ol>
+          <li>Turn gaps cluster near 200 ms across ten languages: Stivers et al., <a href="https://doi.org/10.1073/pnas.0903616106">“Universals and cultural variation in turn-taking in conversation”</a>, PNAS, 2009.</li>
+          <li>Planning a word takes about 600 ms, so replies are prepared in overlap: Levinson &amp; Torreira, <a href="https://doi.org/10.3389/fpsyg.2015.00731">“Timing in turn-taking and its implications for processing models of language”</a>, Frontiers in Psychology, 2015.</li>
+          <li>Requests for repetition most often begin after about 700 ms: Kendrick, <a href="https://doi.org/10.3389/fpsyg.2015.00250">“The intersection of turn-taking and repair”</a>, Frontiers in Psychology, 2015.</li>
+          <li>An auditory store lasting a few seconds: Darwin, Turvey &amp; Crowder, <a href="https://doi.org/10.1016/0010-0285(72)90007-2">“An auditory analogue of the Sperling partial report procedure”</a>, Cognitive Psychology, 1972.</li>
+          <li>The same word everywhere: Dingemanse, Torreira &amp; Enfield, <a href="https://doi.org/10.1371/journal.pone.0078273">“Is ‘Huh?’ a universal word?”</a>, PLOS ONE, 2013. Spellings are approximate.</li>
+          <li>One repair about every 1.4 minutes: Dingemanse et al., <a href="https://doi.org/10.1371/journal.pone.0136100">“Universal principles in the repair of communication problems”</a>, PLOS ONE, 2015.</li>
+        </ol>
+        <p>The fixed marks (200 ms, 600 ms, 700 ms, the echo’s few seconds) are measured averages. How the sliders move the
+          moment of understanding is a simplified model, and the dinner scene is staged with it. The sounds are a rough
+          formant synthesizer: they carry the pitch and vowel of each word, not a real speaker. Touchscreens add a few tens
+          of milliseconds to the reaction test.</p>
+      </details>
+    </section>
+  </main>
+
+  <nav class="chrome" aria-label="Scenes">
+    <button type="button" class="btn" id="prev">Back</button>
+    <div class="dots" id="dots"></div>
+    <button type="button" class="btn" id="sound" aria-pressed="false">Sound off</button>
+    <button type="button" class="btn" id="next">Next</button>
+  </nav>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return Math.round(n).toLocaleString("en-US"); };
+  var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var cssv = getComputedStyle(document.documentElement);
+  var COL = {};
+  ["bg", "ink", "muted", "rule", "voice", "mind", "what"].forEach(function (k) { COL[k] = cssv.getPropertyValue("--" + k).trim(); });
+  function rgba(hex, a) {
+    var n = parseInt(hex.slice(1), 16);
+    return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  function seeded(seed) {
+    return function () {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var x = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x;
+      return ((x ^ x >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ================= Sound: a small formant synthesizer ================= */
+  function makeSynth(ctx) {
+    var nb = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = nb.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    function env(g, t, dur, peak, a, r) {
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(peak, t + a);
+      g.gain.setValueAtTime(peak, Math.max(t + a, t + dur - r));
+      g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    }
+    var Q = [7, 9, 9], LV = [1, 0.7, 0.3];
+    return {
+      ctx: ctx,
+      /* a voiced vowel: sawtooth "vocal cords" through three formant filters */
+      vowel: function (out, t, dur, f0, Fa, Fb, peak) {
+        var o = ctx.createOscillator(); o.type = "sawtooth";
+        o.frequency.setValueAtTime(f0[0], t);
+        for (var i = 1; i < f0.length; i++) o.frequency.linearRampToValueAtTime(f0[i], t + dur * i / (f0.length - 1));
+        var g = ctx.createGain(); env(g, t, dur, peak, Math.min(0.03, dur * 0.25), Math.min(0.07, dur * 0.35));
+        for (var k = 0; k < 3; k++) {
+          var bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = Q[k];
+          bp.frequency.setValueAtTime(Fa[k], t);
+          if (Fb) bp.frequency.linearRampToValueAtTime(Fb[k], t + dur * 0.6);
+          var lg = ctx.createGain(); lg.gain.value = LV[k];
+          o.connect(bp); bp.connect(lg); lg.connect(g);
+        }
+        g.connect(out); o.start(t); o.stop(t + dur + 0.05);
+      },
+      /* breath, s and t: filtered noise */
+      burst: function (out, t, dur, freq, peak) {
+        var s = ctx.createBufferSource(); s.buffer = nb; s.loop = true;
+        var f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq; f.Q.value = 1.1;
+        var g = ctx.createGain(); env(g, t, dur, peak, Math.min(0.012, dur * 0.3), Math.min(0.03, dur * 0.4));
+        s.connect(f); f.connect(g); g.connect(out); s.start(t, Math.random()); s.stop(t + dur + 0.05);
+      },
+      tone: function (out, t, dur, freq, peak, decay) {
+        var o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = freq;
+        var g = ctx.createGain();
+        if (decay) { g.gain.setValueAtTime(peak, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); }
+        else env(g, t, dur, peak, 0.004, 0.008);
+        o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + 0.05);
+      }
+    };
+  }
+  var G = 1.6; // vowel gain after the narrow filters
+  /* "Can you pass the salt?" as pitch, vowels and hiss. k stretches time; att muffles; noise adds a bed. */
+  function sayThem(S, out, t0, k, att, noise) {
+    var lp = S.ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 4200 - att * 30; lp.connect(out);
+    var p = k > 1 ? 0.8 : 1, at = function (ms) { return t0 + ms * k / 1000; }, du = function (ms) { return ms * k / 1000; };
+    S.burst(lp, at(0), du(25), 2200, 0.3);
+    S.vowel(lp, at(25), du(150), [120 * p, 126 * p], [700, 1700, 2500], [430, 1500, 2500], G);
+    S.vowel(lp, at(185), du(140), [126 * p, 118 * p], [300, 2200, 2900], [330, 950, 2300], G);
+    S.vowel(lp, at(375), du(150), [132 * p, 120 * p], [700, 1700, 2500], null, G);
+    S.burst(lp, at(520), du(100), 6000, 0.22);
+    S.vowel(lp, at(625), du(110), [112 * p, 110 * p], [500, 1500, 2500], null, G * 0.8);
+    S.burst(lp, at(742), du(90), 6000, 0.22);
+    S.vowel(lp, at(830), du(250), [114 * p, 128 * p, 170 * p], [570, 880, 2500], [460, 1050, 2500], G);
+    S.burst(lp, at(1105), du(40), 3500, 0.3);
+    if (noise > 20) S.burst(out, at(-150), du(1500), 900, noise / 100 * 0.55);
+  }
+  var WHATS = { q: [[175, 185, 258], 0.24, 1], x: [[235, 335, 205], 0.33, 1.25], f: [[152, 136, 112], 0.2, 0.9] };
+  function sayWhat(S, out, t0, k, kind) {
+    var w = WHATS[kind], p = k > 1 ? 0.85 : 1, f0 = w[0].map(function (f) { return f * p; });
+    S.vowel(out, t0, w[1] * k, f0, [320, 700, 2300], [660, 1200, 2500], G * w[2]);
+    S.burst(out, t0 + w[1] * k, 0.035 * k, 3500, 0.28);
+  }
+  function sayOh(S, out, t0, k) {
+    S.vowel(out, t0, 0.26 * k, [205, 150], [520, 900, 2500], [380, 800, 2400], G);
+    S.vowel(out, t0 + 0.36 * k, 0.08 * k, [160, 158], [500, 1500, 2500], null, G * 0.7);
+    S.burst(out, t0 + 0.45 * k, 0.07 * k, 6000, 0.2);
+    S.vowel(out, t0 + 0.52 * k, 0.17 * k, [165, 130], [570, 880, 2500], null, G);
+    S.burst(out, t0 + 0.7 * k, 0.03 * k, 3500, 0.24);
+  }
+  function saySure(S, out, t0, k) {
+    S.burst(out, t0, 0.07 * k, 3200, 0.22);
+    S.vowel(out, t0 + 0.06 * k, 0.2 * k, [190, 160], [480, 1300, 2300], null, G);
+    S.burst(out, t0 + 0.33 * k, 0.05 * k, 1600, 0.2);
+    S.vowel(out, t0 + 0.37 * k, 0.22 * k, [175, 135], [320, 2200, 2900], [480, 1500, 2500], G);
+  }
+  function sayHuh(S, out, t0, h) {
+    var b = h.base, f0 = h.rise ? [b, b * 1.08, b * 1.5] : [b * 1.35, b * 1.1, b * 0.85];
+    if (h.h) S.burst(out, t0, 0.08, h.F[1], 0.3);
+    S.vowel(out, t0 + (h.h ? 0.06 : 0), h.dur, f0, h.F, null, G);
+  }
+  function ding(S, out, t0) { S.tone(out, t0, 0.9, 1318.5, 0.16, true); S.tone(out, t0, 0.6, 1976, 0.07, true); }
+  window.whatLab = { makeSynth: makeSynth, sayThem: sayThem, sayWhat: sayWhat, sayOh: sayOh, sayHuh: sayHuh };
+
+  var A = null, soundOn = false;
+  function audioInit() {
+    if (A) { if (A.ctx.state === "suspended") A.ctx.resume(); return A; }
+    var C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+    var ctx; try { ctx = new C(); } catch (e) { return null; }
+    var master = ctx.createGain(); master.gain.value = 0.9;
+    var comp = ctx.createDynamicsCompressor(); master.connect(comp); comp.connect(ctx.destination);
+    /* the audible echo: a feedback delay that takes about three seconds to die away */
+    var echoIn = ctx.createGain(), dl = ctx.createDelay(1), fb = ctx.createGain(), lp = ctx.createBiquadFilter(), eo = ctx.createGain();
+    dl.delayTime.value = 0.21; fb.gain.value = 0.6; lp.type = "lowpass"; lp.frequency.value = 1200; eo.gain.value = 0.45;
+    echoIn.connect(dl); dl.connect(lp); lp.connect(fb); fb.connect(dl); lp.connect(eo); eo.connect(master);
+    A = { ctx: ctx, S: makeSynth(ctx), master: master, echoIn: echoIn };
+    return A;
+  }
+  function setSound(on) {
+    soundOn = !!on && !!audioInit();
+    if (A) A.master.gain.value = soundOn ? 0.9 : 0;
+    $("sound").textContent = soundOn ? "Sound on" : "Sound off";
+    $("sound").setAttribute("aria-pressed", soundOn ? "true" : "false");
+  }
+  function bus(echo) {
+    if (!A || !soundOn) return null;
+    if (A.ctx.state === "suspended") A.ctx.resume();
+    var b = A.ctx.createGain(); b.connect(A.master);
+    if (echo) { var s = A.ctx.createGain(); s.gain.value = echo; b.connect(s); s.connect(A.echoIn); }
+    return b;
+  }
+  function killBus(b) {
+    if (!b || !A) return;
+    var t = A.ctx.currentTime;
+    try { b.gain.cancelScheduledValues(t); b.gain.setValueAtTime(b.gain.value, t); b.gain.linearRampToValueAtTime(0, t + 0.05); } catch (e) {}
+    setTimeout(function () { try { b.disconnect(); } catch (e) {} }, 150);
+  }
+  $("sound").addEventListener("click", function () { setSound(!soundOn); });
+
+  /* ================= Canvas: rings of sound ================= */
+  var cv = $("bg"), g = cv.getContext("2d"), VW = 0, VH = 0, rings = [];
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    VW = window.innerWidth; VH = window.innerHeight;
+    cv.width = Math.round(VW * dpr); cv.height = Math.round(VH * dpr);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener("resize", resize); resize();
+  function ring(x, y, color, life, alpha) { rings.push({ x: x, y: y, c: color, born: performance.now(), life: life || 2400, a: alpha || 0.5 }); if (rings.length > 60) rings.shift(); }
+  function ringAt(elm, color, life, alpha) { var r = elm.getBoundingClientRect(); ring(r.left + r.width / 2, r.top + r.height / 2, color, life, alpha); }
+  window.addEventListener("pointerdown", function (e) { ring(e.clientX, e.clientY, COL.voice, 1600, 0.35); }, { passive: true });
+
+  /* ================= Scenes ================= */
+  var scenes = Array.prototype.slice.call(document.querySelectorAll(".scene")), cur = 0, hooks = {};
+  var dots = $("dots");
+  scenes.forEach(function (s, i) {
+    var b = document.createElement("button"); b.type = "button";
+    b.setAttribute("aria-label", (i ? "Scene " + i + ": " : "") + s.dataset.name);
+    b.addEventListener("click", function () { go(i); });
+    dots.appendChild(b);
+  });
+  function chrome() {
+    $("prev").disabled = cur === 0;
+    $("next").textContent = cur === scenes.length - 1 ? "Start over" : cur === 0 ? "Begin" : "Next";
+    Array.prototype.forEach.call(dots.children, function (b, i) {
+      b.setAttribute("aria-current", i === cur ? "true" : "false");
+      if (i === cur) b.classList.add("seen");
+    });
+  }
+  function go(i) {
+    i = clamp(i, 0, scenes.length - 1);
+    if (i === cur) return;
+    if (hooks[cur] && hooks[cur].exit) hooks[cur].exit();
+    scenes[cur].hidden = true; cur = i; scenes[cur].hidden = false; scenes[cur].scrollTop = 0;
+    if (hooks[cur] && hooks[cur].enter) hooks[cur].enter();
+    chrome();
+  }
+  $("prev").addEventListener("click", function () { go(cur - 1); });
+  $("next").addEventListener("click", function () { go(cur === scenes.length - 1 ? 0 : cur + 1); });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-go]"), function (b) {
+    b.addEventListener("click", function () { go(+b.dataset.go); });
+  });
+  document.addEventListener("keydown", function (e) {
+    var tag = e.target && e.target.tagName;
+    if (tag === "INPUT" || e.altKey || e.metaKey || e.ctrlKey) return;
+    if (e.key === "ArrowRight") go(cur + 1); else if (e.key === "ArrowLeft") go(cur - 1);
+  });
+  $("beginSound").addEventListener("click", function () { setSound(true); go(1); });
+  $("beginQuiet").addEventListener("click", function () { setSound(false); go(1); });
+
+  /* ================= The moment: shared model ================= */
+  var TMAX = 3200, E = 1150, COMMIT = E + 500, WHAT = E + 700;
+  var WORDS = [["Can", 0, 180], ["you", 180, 330], ["pass", 330, 620], ["the", 620, 740], ["salt?", 740, 1150]];
+  function model(a, s, n) {
+    var lost = n > 80, C = E - 200 + 9 * a + 5 * s + 4 * n;
+    var o = { regime: lost ? "lost" : (C <= COMMIT ? "answer" : "what"), C: C, a: a, s: s, n: n };
+    if (o.regime === "answer") o.R = Math.max(E + 200, C + 200);
+    if (o.regime === "what") o.R = Math.max(C + 250, WHAT + 350);
+    o.rt = WORDS.map(function (w, k) {
+      if (o.regime === "lost") return Infinity;
+      if (o.regime === "answer") return Math.max(w[1] + 90, w[2] + (C - E));
+      return C - (4 - k) * 90;
+    });
+    return o;
+  }
+  var WAVE = (function () {
+    var out = [], rnd = seeded(7);
+    for (var m = 8; m < E; m += 21) {
+      var w = WORDS.filter(function (x) { return m >= x[1] && m < x[2]; })[0], x = (m - w[1]) / (w[2] - w[1]);
+      out.push([m, 0.16 + 0.84 * Math.pow(Math.sin(Math.PI * x), 0.7) * (0.55 + 0.45 * rnd()), rnd()]);
+    }
+    return out;
+  })();
+
+  /* ================= Scene 1: dinner ================= */
+  var s1 = { timers: [], bus: null, t0: 0, silence: false, count: 0, live: false, fired: false };
+  var D = model(75, 40, 15); // the staged moment: mid-scroll
+  function s1Later(ms, fn) { s1.timers.push(setTimeout(fn, ms)); }
+  function s1Clear() { s1.timers.forEach(clearTimeout); s1.timers = []; killBus(s1.bus); s1.bus = null; s1.silence = false; }
+  function placeDot() {
+    var d = $("dot"); d.hidden = false;
+    d.style.left = (6 + Math.random() * 62) + "%"; d.style.top = (14 + Math.random() * 52) + "%";
+  }
+  function s1Enter() {
+    s1Clear(); s1.count = 0; s1.live = true; s1.fired = false;
+    $("heard").textContent = ""; $("heard").classList.remove("clear");
+    $("spoke").textContent = ""; $("silence").textContent = ""; $("dotCount").textContent = "0";
+    $("phone").classList.remove("frozen"); $("s1After").hidden = true;
+    $("s1Hint").textContent = "Tap each dot the moment it appears. Keep going, whatever happens.";
+    placeDot();
+    s1Later(9000, s1Moment);
+  }
+  function s1Moment() {
+    if (s1.fired) return; s1.fired = true;
+    s1.t0 = performance.now();
+    var b = s1.bus = bus(0.55);
+    if (b) {
+      var at = A.ctx.currentTime + 0.04;
+      sayThem(A.S, b, at, 1, D.a, D.n); sayWhat(A.S, b, at + WHAT / 1000, 1, "q");
+      ding(A.S, b, at + D.C / 1000); sayOh(A.S, b, at + D.R / 1000, 1);
+    }
+    WORDS.forEach(function (w, i) {
+      s1Later(w[1], function () {
+        var sp = document.createElement("span"); sp.textContent = (i ? " " : "“") + w[0] + (i === 4 ? "”" : "");
+        $("heard").appendChild(sp);
+        ring(VW * 0.08, VH * 0.16, COL.voice, 2600, 0.5);
+      });
+    });
+    s1Later(E, function () { s1.silence = true; });
+    s1Later(WHAT, function () {
+      s1.live = false; $("dot").hidden = true; $("phone").classList.add("frozen");
+      var w = document.createElement("b"); w.textContent = "What?"; $("spoke").appendChild(w);
+      ringAt($("phone"), COL.what, 2600, 0.7);
+    });
+    s1Later(D.C, function () { $("heard").classList.add("clear"); ringAt($("heard"), COL.mind, 2200, 0.6); });
+    s1Later(D.R, function () {
+      s1.silence = false;
+      $("spoke").appendChild(document.createTextNode("…oh. The salt."));
+      $("silence").textContent = "you answered " + fmt(D.R - E) + " ms after they stopped";
+    });
+    s1Later(D.R + 1200, function () {
+      $("s1Hint").textContent = "That took less than two and a half seconds.";
+      $("s1After").hidden = false;
+      $("s1After").scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+    });
+  }
+  $("dot").addEventListener("pointerdown", function (e) {
+    e.preventDefault(); if (!s1.live) return;
+    s1.count += 1; $("dotCount").textContent = String(s1.count);
+    $("dot").hidden = true;
+    s1Later(200 + Math.random() * 220, function () { if (s1.live) placeDot(); });
+    if (s1.count === 4) s1Later(380, s1Moment);
+  });
+  $("dot").addEventListener("keydown", function (e) {
+    if (e.key === " " || e.key === "Enter") { e.preventDefault(); $("dot").dispatchEvent(new Event("pointerdown")); }
+  });
+  $("s1Again").addEventListener("click", s1Enter);
+  hooks[1] = { enter: s1Enter, exit: s1Clear };
+
+  /* ================= Scene 2: inside the moment ================= */
+  var att = $("att"), sur = $("sur"), noi = $("noi"), scrub = $("scrub");
+  var S = null, t = TMAX, playing = 0, lastFrame = 0, s2bus = null, s2seen = false;
+  var pct = function (ms) { return (ms / TMAX * 100) + "%"; };
+
+  function render() {
+    S = model(+att.value, +sur.value, +noi.value);
+    var tr = $("rulerTrack"); tr.textContent = "";
+    function mark(ms, cls) { var i = document.createElement("i"); i.className = cls; i.style.left = pct(ms); tr.appendChild(i); }
+    mark(E, "k-voice"); mark(E + 200, "k-slot");
+    mark(S.regime === "answer" ? S.R : WHAT, "k-what");
+    if (S.regime !== "lost") mark(S.C, "k-mind");
+    $("attOut").textContent = S.a < 25 ? "On them" : S.a < 60 ? "Drifting" : "Elsewhere";
+    $("surOut").textContent = S.s < 30 ? "Expected" : S.s < 70 ? "Unusual" : "Out of nowhere";
+    $("noiOut").textContent = S.n < 30 ? "Quiet" : S.n <= 80 ? "Noisy" : "Drowning it out";
+    var head = $("outHead"), body = $("outBody"), d = Math.round(S.C - E);
+    if (S.regime === "answer") {
+      head.textContent = "You answer on time.";
+      body.textContent = (d <= 0
+        ? "You had the meaning " + fmt(-d) + " ms before they finished, because you predicted the ending. "
+        : "The meaning landed " + fmt(d) + " ms after they stopped, late but before the silence got awkward. ") +
+        "Your reply starts " + fmt(S.R - E) + " ms after their last sound.";
+    } else if (S.regime === "what") {
+      head.textContent = "You say “What?” and then answer anyway.";
+      body.textContent = "The meaning landed " + fmt(d) + " ms after they stopped. " +
+        (S.C < WHAT ? "That was " + fmt(WHAT - S.C) + " ms before “What?” came out, but the word was already on its way. "
+                    : "By then “What?” had been out for " + fmt(S.C - WHAT) + " ms. ") +
+        "The sound was only " + (S.C / 1000).toFixed(1) + " seconds old, well inside the echo.";
+    } else {
+      head.textContent = "You say “What?” and mean it.";
+      body.textContent = "The noise damaged the sound before it reached you. The echo keeps a faithful copy of noise, " +
+        "and no amount of extra time will decode it. This is the “what?” the word was built for.";
+    }
+    setTime(TMAX);
+  }
+  function narrate() {
+    var r = S.regime, x;
+    if (t < 60) x = "Their first sound is crossing the table.";
+    else if (t < E) {
+      x = r === "answer"
+        ? (S.C <= E && t >= S.C ? "They’re still talking, and you already know how this sentence ends. Your reply is being built."
+                                 : "They’re talking. You decode each word as it arrives and guess the rest.")
+        : r === "what" ? "They’re talking. The sound goes into the ring, your echo. Your attention is somewhere else."
+        : "They’re talking, but the noise is burying the words.";
+    } else if (r === "answer") {
+      x = t < S.R ? (S.C <= E ? "They’ve stopped. Your reply was ready before they finished."
+                              : (t < S.C ? "They’ve stopped. You’re a beat behind, still finishing the thought."
+                                         : "Got it, with time to spare before the silence means anything."))
+                  : "You answer " + fmt(S.R - E) + " ms after they stop. Nobody notices a gap.";
+    } else if (t < COMMIT) {
+      x = r === "what" ? "Silence. It’s your turn and you have nothing ready. The sentence sits in the echo, not yet decoded."
+                       : "Silence. It’s your turn. You search the echo and find mostly noise.";
+    } else if (r === "lost") {
+      x = t < WHAT ? "Nothing is coming. Your brain commits to the repair word."
+                   : "A real “What?” The echo is too damaged to read, so they’ll need to say it again.";
+    } else if (t < WHAT) {
+      x = t >= S.C ? "The meaning just landed. Too late: “What?” is already on its way to your mouth."
+                   : "The pause has gone on too long. Your brain commits to the one word that needs no planning.";
+    } else if (t < S.C) {
+      x = "“What?” is out. The decoding hasn’t stopped. It’s still working through the echo.";
+    } else if (t < S.R) {
+      x = S.C >= WHAT ? "There it is. The meaning lands " + fmt(S.C - WHAT) + " ms after you asked for it."
+                      : "You’ve said “What?” while already knowing the answer. Now your mouth has to catch up.";
+    } else {
+      x = "You answer your own question. They never had to repeat a word.";
+    }
+    var n = $("narr"); n.textContent = "";
+    var sp = document.createElement("span"); sp.className = "num"; sp.textContent = fmt(t) + " ms";
+    n.appendChild(sp); n.appendChild(document.createTextNode(x));
+  }
+  function setTime(ms) {
+    var prev = t; t = clamp(ms, 0, TMAX);
+    scrub.value = Math.round(t); $("clock").textContent = fmt(t) + " ms";
+    if (playing && cur === 2) {
+      var c = ringGeom();
+      if (S.regime !== "answer" && prev < WHAT && t >= WHAT) ring(c.cx, c.cy, COL.what, 2600, 0.7);
+      if (S.regime !== "lost" && prev < S.C && t >= S.C) ring(c.cx, c.cy, COL.mind, 2200, 0.6);
+    }
+    narrate();
+  }
+  function stop() {
+    playing = 0; killBus(s2bus); s2bus = null;
+    $("playSlow").setAttribute("aria-pressed", "false"); $("playSlow").textContent = "Play at ¼ speed";
+    $("playReal").setAttribute("aria-pressed", "false"); $("playReal").textContent = "Real speed";
+  }
+  function play(rate, btn) {
+    var same = playing === rate; stop(); if (same) return;
+    if (t >= TMAX - 5) setTime(0);
+    playing = rate; btn.setAttribute("aria-pressed", "true"); btn.textContent = "Pause";
+    lastFrame = performance.now();
+    var b = s2bus = bus(rate === 1 ? 0.5 : 0.25);
+    if (b) {
+      var k = 1 / rate, now = A.ctx.currentTime + 0.04, when = function (ms) { return now + (ms - t) * k / 1000; };
+      if (t < 20) sayThem(A.S, b, when(0), k, S.a, S.n);
+      if (S.regime !== "answer" && WHAT >= t) sayWhat(A.S, b, when(WHAT), k, "q");
+      if (S.regime !== "lost" && S.C >= t) ding(A.S, b, when(S.C));
+      if (S.regime === "what" && S.R >= t) sayOh(A.S, b, when(S.R), k);
+      if (S.regime === "answer" && S.R >= t) saySure(A.S, b, when(S.R), k);
+    }
+  }
+  $("playSlow").addEventListener("click", function () { play(0.25, this); });
+  $("playReal").addEventListener("click", function () { play(1, this); });
+  scrub.addEventListener("input", function () { stop(); setTime(+scrub.value); });
+  [att, sur, noi].forEach(function (i) { i.addEventListener("input", function () { stop(); render(); }); });
+  var PRESETS = { ears: [5, 10, 10], scroll: [75, 40, 15], odd: [30, 95, 10], bar: [20, 30, 92] };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-preset]"), function (b) {
+    b.addEventListener("click", function () {
+      var p = PRESETS[b.dataset.preset]; att.value = p[0]; sur.value = p[1]; noi.value = p[2];
+      stop(); render(); setTime(0); play(0.25, $("playSlow"));
+    });
+  });
+  function sheet(open) { $("sheet").hidden = !open; $("sheetOpen").setAttribute("aria-expanded", open ? "true" : "false"); }
+  $("sheetOpen").addEventListener("click", function () { sheet($("sheet").hidden); });
+  $("sheetClose").addEventListener("click", function () { sheet(false); });
+  hooks[2] = {
+    enter: function () {
+      render();
+      if (!s2seen && !reduced) { s2seen = true; setTime(0); play(0.25, $("playSlow")); }
+    },
+    exit: function () { stop(); sheet(false); }
+  };
+
+  function ringGeom() {
+    var r = $("ringSlot").getBoundingClientRect(), land = r.width > r.height * 1.3;
+    return land
+      ? { land: true, cx: r.left + r.width * 0.56, cy: r.top + r.height / 2, r: Math.min(r.height * 0.34, r.width * 0.2), sx: r.left + Math.max(30, r.width * 0.12), sy: r.top + r.height / 2 }
+      : { land: false, cx: r.left + r.width / 2, cy: r.top + r.height * 0.57, r: Math.min(r.width * 0.33, r.height * 0.3), sx: r.left + r.width / 2, sy: r.top + 12 };
+  }
+  var GLYPHS = "abcdefghijklmnopqrstuvwxyz";
+  function scramble(word, k, tick) {
+    var o = "";
+    for (var i = 0; i < word.length; i++) {
+      var ch = word[i];
+      o += /[a-z]/i.test(ch) ? GLYPHS[(Math.imul(k * 31 + i * 17 + tick * 7, 2654435761) >>> 8) % 26] : ch;
+    }
+    return o;
+  }
+  function drawScope(now) {
+    var c = ringGeom(), r = c.r, SPAN = Math.PI * 2 * (330 / 360), A0 = -Math.PI / 2;
+    var ang = function (ms) { return A0 + ms / E * SPAN; };
+    g.lineCap = "round";
+    /* them */
+    var amp = 0;
+    if (t > 0 && t < E) { for (var i = 0; i < WAVE.length; i++) if (WAVE[i][0] <= t) amp = WAVE[i][1]; }
+    g.fillStyle = COL.voice; g.beginPath(); g.arc(c.sx, c.sy, 4 + amp * 9, 0, 6.3); g.fill();
+    g.font = "500 10px " + cssv.getPropertyValue("--font-data"); g.fillStyle = COL.muted; g.textBaseline = "middle";
+    g.textAlign = c.land ? "center" : "left";
+    g.fillText("THEM", c.land ? c.sx : c.sx + 20, c.land ? c.sy - 26 : c.sy);
+    if (t > 0 && t < E) {
+      var a = ang(t); g.strokeStyle = rgba(COL.voice, 0.45); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(c.sx, c.sy); g.lineTo(c.cx + Math.cos(a) * (r + 6), c.cy + Math.sin(a) * (r + 6)); g.stroke();
+    }
+    /* the echo ring */
+    g.strokeStyle = COL.rule; g.lineWidth = 1; g.beginPath(); g.arc(c.cx, c.cy, r, 0, 6.3); g.stroke();
+    var nz = S.n / 100;
+    for (var j = 0; j < WAVE.length; j++) {
+      var ms = WAVE[j][0]; if (ms > t) break;
+      var age = t - ms, al = age < 140 ? 1 : Math.max(0.14, 1 - age / 3300), th = ang(ms), co = Math.cos(th), si = Math.sin(th);
+      var len = WAVE[j][1] * r * 0.3 * (age < 140 ? 1.15 : 1);
+      g.strokeStyle = rgba(COL.voice, al); g.lineWidth = Math.max(1.5, r * 0.022);
+      g.beginPath(); g.moveTo(c.cx + co * (r + 5), c.cy + si * (r + 5)); g.lineTo(c.cx + co * (r + 5 + len), c.cy + si * (r + 5 + len)); g.stroke();
+      if (nz > 0.2) {
+        var th2 = th + SPAN / WAVE.length / 2, l2 = (0.25 + 0.75 * WAVE[j][2]) * nz * r * 0.34;
+        g.strokeStyle = rgba(COL.muted, 0.5 * al + 0.1);
+        g.beginPath(); g.moveTo(c.cx + Math.cos(th2) * (r + 5), c.cy + Math.sin(th2) * (r + 5));
+        g.lineTo(c.cx + Math.cos(th2) * (r + 5 + l2), c.cy + Math.sin(th2) * (r + 5 + l2)); g.stroke();
+      }
+    }
+    g.fillStyle = COL.muted; g.textAlign = "center";
+    g.fillText("YOU", c.cx, c.cy + r * 1.34 + 12);
+    /* understanding */
+    var p0 = S.regime === "lost" ? 60 : S.rt[0] - 150;
+    var p = S.regime === "lost" ? clamp((t - 60) / 4200, 0, 0.5) : clamp((t - p0) / (S.C - p0), 0, 1);
+    if (p > 0) {
+      g.strokeStyle = COL.mind; g.lineWidth = 3;
+      if (S.regime === "lost") g.setLineDash([3, 7]);
+      g.beginPath(); g.arc(c.cx, c.cy, r - 9, A0, A0 + p * Math.PI * 2); g.stroke(); g.setLineDash([]);
+    }
+    /* the sentence, decoding */
+    var fs = clamp(r * 0.2, 13, 30), disp = cssv.getPropertyValue("--font-display");
+    g.font = "italic 400 " + fs + "px " + disp; g.textAlign = "left"; g.textBaseline = "alphabetic";
+    var lines = [[0, 1, 2], [3, 4]], tick = Math.floor(now / 90), sp = fs * 0.28;
+    lines.forEach(function (ln, li) {
+      var widths = ln.map(function (k) { return g.measureText(WORDS[k][0]).width; });
+      var total = widths.reduce(function (s, w) { return s + w; }, 0) + sp * (ln.length - 1);
+      var x = c.cx - total / 2, y = c.cy - r * 0.34 + li * fs * 1.18;
+      ln.forEach(function (k, n) {
+        if (t >= WORDS[k][1]) {
+          var done = t >= S.rt[k];
+          g.fillStyle = done ? COL.ink : rgba(COL.voice, 0.5);
+          g.fillText(done ? WORDS[k][0] : scramble(WORDS[k][0], k, tick), x, y);
+        }
+        x += widths[n] + sp;
+      });
+    });
+    /* your mouth */
+    g.textAlign = "center";
+    var said = S.regime === "answer" ? S.R : WHAT;
+    if (t >= said) {
+      var grow = clamp((t - said) / 160, 0, 1), big = S.regime === "answer" ? r * 0.27 : r * 0.46;
+      g.font = "italic 400 " + (big * (0.6 + 0.4 * grow)) + "px " + disp; g.fillStyle = COL.what;
+      g.fillText(S.regime === "answer" ? "Sure. Here." : "What?", c.cx, c.cy + r * 0.36);
+      if (t < said + 320) {
+        g.strokeStyle = rgba(COL.what, 0.6); g.lineWidth = 1.5;
+        var dx = c.sx - c.cx, dy = c.sy - c.cy, dl = Math.sqrt(dx * dx + dy * dy) || 1;
+        g.beginPath(); g.moveTo(c.cx + dx / dl * (r * 1.36), c.cy + dy / dl * (r * 1.36)); g.lineTo(c.sx, c.sy); g.stroke();
+      }
+    }
+    g.font = "italic 400 " + clamp(r * 0.18, 12, 26) + "px " + disp;
+    if (S.regime === "what" && t >= S.R) { g.fillStyle = COL.ink; g.fillText("…oh. The salt.", c.cx, c.cy + r * 0.62); }
+    if (S.regime === "lost" && t >= WHAT + 500) { g.fillStyle = COL.muted; g.fillText("(they say it again)", c.cx, c.cy + r * 0.62); }
+  }
+
+  /* ================= Frame loop ================= */
+  var lastAmbient = 0;
+  function loop(now) {
+    g.clearRect(0, 0, VW, VH);
+    if (!reduced && (cur === 0 || cur === 6) && now - lastAmbient > 2600) {
+      lastAmbient = now;
+      if (cur === 0) ringAt($("titleWhat"), COL.what, 5200, 0.22); else ring(VW * 0.5, VH * 0.45, COL.what, 5200, 0.2);
+    }
+    for (var i = rings.length - 1; i >= 0; i--) {
+      var q = rings[i], age = now - q.born;
+      if (age > q.life) { rings.splice(i, 1); continue; }
+      g.strokeStyle = rgba(q.c, (1 - age / q.life) * q.a); g.lineWidth = 1.5;
+      g.beginPath(); g.arc(q.x, q.y, 8 + age * 0.16, 0, 6.3); g.stroke();
+    }
+    if (cur === 1 && s1.silence) $("silence").textContent = "silence · " + fmt(now - s1.t0 - E) + " ms";
+    if (cur === 2 && S) {
+      if (playing) {
+        var dt = Math.min(now - lastFrame, 64); lastFrame = now;
+        setTime(t + dt * playing);
+        if (t >= TMAX) stop();
+      }
+      drawScope(now);
+    }
+    requestAnimationFrame(loop);
+  }
+  if (document.fonts && document.fonts.load) document.fonts.load('italic 20px "Instrument Serif"');
+  requestAnimationFrame(loop);
+
+  /* ================= Scene 3: the deadline ================= */
+  var GAP = 200, WORD = 600, TYPICAL = 250;
+  var pad = $("pad"), padMain = $("padMain"), padSub = $("padSub");
+  var rtState = "idle", rtTimers = [], rtT0 = 0, rtBest = null, rtCount = 0;
+  function drawBars() {
+    var rt = rtBest == null ? TYPICAL : rtBest, max = Math.max(700, Math.ceil((rt + 60) / 100) * 100);
+    $("barGap").style.width = (GAP / max * 100) + "%";
+    $("barWord").style.width = (WORD / max * 100) + "%";
+    $("barRt").style.width = (rt / max * 100) + "%";
+  }
+  function setPad(state, main, sub) { rtState = state; pad.dataset.state = state; padMain.textContent = main; padSub.textContent = sub; }
+  function rtClear() { rtTimers.forEach(clearTimeout); rtTimers = []; }
+  function rtIdle() {
+    rtClear();
+    if (rtBest == null) setPad("idle", "Tap to start", "Then tap again the moment this panel changes colour");
+    else setPad("result", fmt(rtBest) + " ms", "Your best so far. Tap to go again");
+  }
+  function rtPress() {
+    if (rtState === "feel") return;
+    if (rtState === "waiting") { rtClear(); setPad("early", "Too early", "Tap to try again, and wait for the colour"); return; }
+    if (rtState === "go") {
+      var rt = Math.round(performance.now() - rtT0);
+      rtCount += 1; if (rtBest == null || rt < rtBest) rtBest = rt;
+      setPad("result", fmt(rt) + " ms", rtCount > 1 ? "Best so far " + fmt(rtBest) + " ms. Tap to go again" : "Tap to go again");
+      $("rtLabel").textContent = rtCount > 1 ? "Your best reaction of " + rtCount : "Your reaction";
+      $("rtNum").textContent = fmt(rtBest) + " ms";
+      $("barRt").className = "bar-fill is-what"; drawBars();
+      $("rtVerdict").textContent = rtBest >= GAP
+        ? fmt(rtBest) + " ms, just to tap. People start their reply in less time than that, about 200 ms after the other " +
+          "person stops, and a single word takes about 600 ms to prepare. Nobody is that fast. You begin building your reply " +
+          "while they are still talking, on a guess about how the sentence ends. “What?” is that guess coming due with nothing behind it."
+        : fmt(rtBest) + " ms is quick. It still leaves nowhere near enough time to build a reply after the other person " +
+          "stops: one word takes about 600 ms to prepare. You begin while they are still talking, on a guess about how the " +
+          "sentence ends. “What?” is that guess coming due with nothing behind it.";
+      return;
+    }
+    setPad("waiting", "Wait for it…", "Tap the moment the colour changes");
+    rtTimers.push(setTimeout(function () { setPad("go", "Now", "Tap"); rtT0 = performance.now(); }, 1300 + Math.random() * 2200));
+  }
+  pad.addEventListener("pointerdown", function (e) { e.preventDefault(); pad.focus(); rtPress(); });
+  pad.addEventListener("keydown", function (e) { if ((e.key === " " || e.key === "Enter") && !e.repeat) { e.preventDefault(); rtPress(); } });
+  $("feel").addEventListener("click", function () {
+    rtClear();
+    var rt = rtBest == null ? TYPICAL : rtBest;
+    var seq = [[GAP, "voice", "the gap between turns", 330], [rt, "what", rtBest == null ? "a typical reaction" : "your reaction", 440], [WORD, "mind", "preparing one word", 262]];
+    var at = 500, b = bus(0);
+    setPad("feel", "Watch", "Three flashes, each exactly as long as its number"); pad.dataset.state = "rest";
+    seq.forEach(function (s) {
+      if (b) A.S.tone(b, A.ctx.currentTime + at / 1000, s[0] / 1000, s[3], 0.22, false);
+      rtTimers.push(setTimeout(function () {
+        pad.dataset.state = "pulse-" + s[1]; padMain.textContent = fmt(s[0]) + " ms"; padSub.textContent = s[2];
+        rtTimers.push(setTimeout(function () { pad.dataset.state = "rest"; }, s[0]));
+      }, at));
+      at += s[0] + 1000;
+    });
+    rtTimers.push(setTimeout(rtIdle, at));
+  });
+  hooks[3] = { exit: rtIdle };
+  drawBars();
+
+  /* ================= Scene 4: the chorus ================= */
+  var FA = [800, 1250, 2500], FE = [450, 1900, 2600], FEH = [580, 1800, 2500], FUH = [650, 1200, 2500];
+  var HUH = [
+    { lang: "English", form: "huh?", place: "", rise: true, F: FUH, h: true, base: 130, dur: 0.28 },
+    { lang: "Spanish", form: "¿eh?", place: "", rise: true, F: FE, h: false, base: 190, dur: 0.24 },
+    { lang: "Italian", form: "eh?", place: "", rise: true, F: FEH, h: false, base: 150, dur: 0.26 },
+    { lang: "Dutch", form: "hè?", place: "", rise: true, F: FEH, h: true, base: 210, dur: 0.26 },
+    { lang: "Icelandic", form: "ha?", place: "Iceland", rise: false, F: FA, h: true, base: 140, dur: 0.26 },
+    { lang: "Russian", form: "а?", place: "written “a?” in Latin letters", rise: true, F: FA, h: false, base: 115, dur: 0.26 },
+    { lang: "Mandarin", form: "á?", place: "", rise: true, F: FA, h: false, base: 220, dur: 0.28 },
+    { lang: "Lao", form: "hãa?", place: "Laos", rise: true, F: FA, h: true, base: 180, dur: 0.36 },
+    { lang: "Siwu", form: "ã?", place: "eastern Ghana", rise: true, F: FA, h: false, base: 125, dur: 0.26 },
+    { lang: "Cha’palaa", form: "aa?", place: "the rainforest of northern Ecuador", rise: false, F: FA, h: false, base: 200, dur: 0.36 },
+    { lang: "Murrinh-Patha", form: "aa?", place: "Australia’s Northern Territory", rise: true, F: FA, h: false, base: 160, dur: 0.36 }
+  ];
+  var chorus = $("chorus"), huhBtns = [], chTimers = [];
+  function huhSelect(i) {
+    huhBtns.forEach(function (b, k) { b.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+    var h = HUH[i];
+    $("huhDetail").textContent = h.lang + (h.place ? " (" + h.place + ")" : "") + ": one open syllable, " +
+      (h.rise ? "with the rising pitch of a question." : "with falling pitch, because questions fall in this language. Same tool, tuned to local rules.");
+  }
+  function huhSound(i, b) {
+    var h = HUH[i], btn = huhBtns[i];
+    if (b) sayHuh(A.S, b, A.ctx.currentTime + 0.02, h);
+    btn.classList.add("sounding"); ringAt(btn, COL.what, 1800, 0.5);
+    chTimers.push(setTimeout(function () { btn.classList.remove("sounding"); }, 420));
+  }
+  function chorusStop() { chTimers.forEach(clearTimeout); chTimers = []; huhBtns.forEach(function (b) { b.classList.remove("sounding"); }); }
+  HUH.forEach(function (h, i) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "huh";
+    var f = document.createElement("b"); f.textContent = h.form;
+    var s = document.createElement("small"); s.textContent = h.lang;
+    b.appendChild(f); b.appendChild(s); chorus.appendChild(b); huhBtns.push(b);
+    b.addEventListener("click", function () { chorusStop(); huhSelect(i); huhSound(i, bus(0.3)); });
+  });
+  $("chorusAll").addEventListener("click", function () {
+    chorusStop(); var b = bus(0.3);
+    HUH.forEach(function (h, i) { chTimers.push(setTimeout(function () { huhSelect(i); huhSound(i, b); }, i * 460)); });
+  });
+  huhSelect(8);
+  hooks[4] = { exit: chorusStop };
+
+  /* ================= Scene 5: three melodies ================= */
+  var TONES = [
+    ["q", "The half-second kind. You’re flagging trouble without saying where it is, because you don’t know yet. Linguists " +
+      "call this an open request: the vaguest repair there is. If you had caught most of the sentence, you would have " +
+      "said “pass the what?” instead."],
+    ["x", "You heard it perfectly. The sound arrived, the meaning arrived, and the meaning didn’t fit the world you were " +
+      "expecting. This one asks the speaker to say it again so you can check it’s real. It is a request for confirmation " +
+      "wearing the costume of a hearing problem."],
+    ["f", "Someone says your name, or “guess what,” and you reply “what” knowing that nothing has been said yet. Here " +
+      "the word means the line is open and you’re listening. Linguists call it a go-ahead."]
+  ];
+  var toneBtns = document.querySelectorAll(".tone");
+  function setTone(i, sound) {
+    Array.prototype.forEach.call(toneBtns, function (b, k) { b.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+    $("toneBody").textContent = TONES[i][1];
+    if (sound) { var b = bus(0.2); if (b) sayWhat(A.S, b, A.ctx.currentTime + 0.02, 1, TONES[i][0]); ringAt(toneBtns[i], COL.what, 1800, 0.5); }
+  }
+  Array.prototype.forEach.call(toneBtns, function (b) { b.addEventListener("click", function () { setTone(+b.dataset.tone, true); }); });
+  setTone(0, false);
+
+  /* ================= Scene 6: ticker ================= */
+  var opened = Date.now();
+  function tick() {
+    var sec = Math.floor((Date.now() - opened) / 1000), n = Math.floor(sec / 84);
+    var el = $("ticker"); el.textContent = "";
+    function add(text, num) { var s = document.createElement("span"); if (num) s.className = "num"; s.textContent = text; el.appendChild(s); }
+    add("In ordinary conversation, someone stops to ask for a repair like this about once every 84 seconds. You opened this page ");
+    add(Math.floor(sec / 60) + ":" + ("0" + sec % 60).slice(-2), true);
+    add(" ago. Had we been talking, that’s "); add(String(n), true); add(n === 1 ? " time so far." : " times so far.");
+  }
+  tick(); setInterval(tick, 1000);
+
+  S = model(75, 40, 15);
+  chrome();
+})();
+</script>
