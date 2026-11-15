@@ -9,29 +9,29 @@ from a few-second memory of its sound just after "what?" has left.
 
 ## The site
 
-The finished site is in [`docs/`](docs/). It is two static pages with no dependencies
-beyond web fonts.
+The site is two static pages at the root of this repository, with no dependencies beyond
+web fonts.
 
 | Page | What it is |
 | --- | --- |
-| [`docs/index.html`](docs/index.html) | The immersive version. Six scenes with sound: a staged dinner-table moment, the same three seconds in slow motion, a reaction test, "huh?" in eleven languages, three intonations of "what", and the sources. |
-| [`docs/text.html`](docs/text.html) | The same answer as a single scrolling page. |
+| [`index.html`](index.html) | The main page, the immersive version. Six scenes with sound: a staged dinner-table moment, the same three seconds in slow motion, a reaction test, "huh?" in eleven languages, three intonations of "what", and the sources. |
+| [`text.html`](text.html) | The same answer as a single scrolling page, linked from the main one. |
 
-To view it, open `docs/index.html` in a browser. To host it with GitHub Pages, go to
-**Settings → Pages**, choose **Deploy from a branch**, and pick this branch with the
-`/docs` folder.
+To view it, open `index.html` in a browser. To host it with GitHub Pages, go to
+**Settings → Pages**, choose **Deploy from a branch**, and pick the default branch with the
+`/ (root)` folder.
 
 The voices are generated in the browser by a small formant synthesizer. They carry the pitch
 and vowel shape of each word and are not recordings of real speech.
 
 ## Editing
 
-The pages are written as fragments at the repository root:
+`index.html` and `text.html` are built files. Edit the sources in `src/` instead:
 
-- `inside-what.html` is the source of `docs/index.html`
-- `say-what.html` is the source of `docs/text.html`
+- `src/inside-what.html` is the source of `index.html`
+- `src/say-what.html` is the source of `text.html`
 
-After changing either one, rebuild the site:
+Then rebuild:
 
 ```bash
 python3 build.py

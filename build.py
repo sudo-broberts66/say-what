@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build the standalone site in docs/ from the two page sources.
+"""Build the site (index.html and text.html at the repository root) from src/.
 
-The sources (inside-what.html, say-what.html) are page fragments: a <title>,
+The sources (src/inside-what.html, src/say-what.html) are page fragments: a <title>,
 <meta>, <link> and <style> followed by the page body, with no <html> or <head>
 of their own. This wraps each one in a complete HTML document and points the
 links between the two pages at each other.
@@ -11,7 +11,8 @@ links between the two pages at each other.
 from pathlib import Path
 
 ROOT = Path(__file__).parent
-OUT = ROOT / "docs"
+SRC = ROOT / "src"
+OUT = ROOT
 
 SHELL = """<!doctype html>
 <html lang="en">
@@ -56,9 +57,8 @@ PAGES = [
 
 
 def build():
-    OUT.mkdir(exist_ok=True)
     for page in PAGES:
-        source = (ROOT / page["src"]).read_text(encoding="utf-8")
+        source = (SRC / page["src"]).read_text(encoding="utf-8")
         for old, new in page["replace"]:
             if old not in source:
                 raise SystemExit(f"{page['src']}: expected text not found: {old[:60]}")
@@ -67,7 +67,7 @@ def build():
         html = SHELL.format(description=page["description"],
                             head=source[:cut].strip(), body=source[cut:].strip())
         (OUT / page["out"]).write_text(html, encoding="utf-8")
-        print(f"docs/{page['out']}  ({len(html):,} bytes)")
+        print(f"{page['out']}  ({len(html):,} bytes)")
     # Tell GitHub Pages to serve the files as they are.
     (OUT / ".nojekyll").write_text("", encoding="utf-8")
 
